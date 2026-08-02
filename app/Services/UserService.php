@@ -25,6 +25,26 @@ class UserService extends AbstractService
     }
 
     /**
+     * Update a user's profile and role.
+     */
+    public function updateUser(User $user, array $data): User
+    {
+        $user->fill([
+            'name' => $data['name'],
+            'email' => $data['email'],
+        ]);
+
+        if (! empty($data['password'])) {
+            $user->password = $data['password'];
+        }
+
+        $user->save();
+        $user->roles()->sync([(int) $data['role_id']]);
+
+        return $user->load('roles');
+    }
+
+    /**
      * Replace a user's assigned roles with the given role ids.
      */
     public function syncRoles(User $user, array|Collection $roleIds): User

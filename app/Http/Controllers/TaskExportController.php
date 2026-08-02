@@ -31,6 +31,7 @@ class TaskExportController extends Controller
         $tasks = $service->queryTasks($filters)->latest()->get();
 
         return Pdf::loadView('exports.tasks', ['tasks' => $tasks])
+            ->setPaper('a4', 'landscape')
             ->download('tasks-'.now()->format('Y-m-d').'.pdf');
     }
 }

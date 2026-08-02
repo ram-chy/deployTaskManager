@@ -119,6 +119,105 @@ class UserRoleTest extends TestCase
             ->assertSessionHasErrors(['name', 'email', 'password', 'role_id']);
     }
 
+    public function test_admin_can_update_a_user(): void
+    {
+        $admin = User::factory()->create();
+        $admin->assignRole('admin');
+
+        $target = User::factory()->create();
+        $target->assignRole('staff');
+
+        $this->actingAs($admin)
+            ->patch(route('users.update', $target), [
+                'name' => 'Updated Name',
+                'email' => 'updated@flexmania.local',
+                'password' => 'newpassword123',
+                'password_confirmation' => 'newpassword123',
+                'role_id' => Role::where('slug', 'manager')->value('id'),
+            ])
+            ->assertRedirect()
+            ->assertSessionHas('success');
+
+        $target->refresh();
+
+        $this->assertSame('Updated Name', $target->name);
+        $this->assertSame('updated@flexmania.local', $target->email);
+        $this->assertNotSame('newpassword123', $target->password);
+        $this->assertTrue($target->isManager());
+    }
+
+    public function test_admin_can_update_a_user_without_changing_password(): void
+    {
+        $admin = User::factory()->create();
+        $admin->assignRole('admin');
+
+        $target = User::factory()->create(['password' => 'originalpass123']);
+        $target->assignRole('staff');
+
+        $this->actingAs($admin)
+            ->patch(route('users.update', $target), [
+                'name' => 'Kept Password',
+                'email' => $target->email,
+                'password' => '',
+                'password_confirmation' => '',
+                'role_id' => Role::where('slug', 'staff')->value('id'),
+            ])
+            ->assertRedirect()
+            ->assertSessionHas('success');
+
+        $target->refresh();
+
+        $this->assertSame('Kept Password', $target->name);
+        $this->assertTrue(password_verify('originalpass123', $target->password));
+    }
+
+    public function test_non_admins_cannot_update_users(): void
+    {
+        $manager = User::factory()->create();
+        $manager->assignRole('manager');
+
+        $target = User::factory()->create();
+
+        $this->actingAs($manager)
+            ->patch(route('users.update', $target), [
+                'name' => 'Hacker',
+                'email' => 'hacker@flexmania.local',
+                'password' => '',
+                'password_confirmation' => '',
+                'role_id' => Role::where('slug', 'staff')->value('id'),
+            ])
+            ->assertForbidden();
+
+        $this->assertDatabaseHas('users', [
+            'id' => $target->id,
+            'name' => $target->name,
+            'email' => $target->email,
+        ]);
+    }
+
+    public function test_user_update_validates_input(): void
+    {
+        $admin = User::factory()->create();
+        $admin->assignRole('admin');
+
+        $target = User::factory()->create();
+        $other = User::factory()->create();
+        $originalEmail = $target->email;
+
+        $this->actingAs($admin)
+            ->from('/users')
+            ->patch(route('users.update', $target), [
+                'name' => '',
+                'email' => $other->email,
+                'password' => 'short',
+                'password_confirmation' => 'mismatch',
+                'role_id' => 999,
+            ])
+            ->assertSessionHasErrors(['name', 'email', 'password', 'role_id']);
+
+        $this->assertSame($originalEmail, $target->refresh()->email);
+    }
+
     public function test_admin_can_update_a_users_role(): void
     {
         $admin = User::factory()->create();

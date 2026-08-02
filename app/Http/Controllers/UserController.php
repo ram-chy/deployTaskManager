@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreUserRequest;
+use App\Http\Requests\UpdateUserRequest;
 use App\Http\Requests\UpdateUserRoleRequest;
 use App\Http\Resources\RoleResource;
 use App\Http\Resources\UserResource;
@@ -28,6 +29,13 @@ class UserController extends Controller
         $service->createUser($request->validated());
 
         return back()->with('success', 'User created.');
+    }
+
+    public function update(UpdateUserRequest $request, UserService $service, User $user): RedirectResponse
+    {
+        $service->updateUser($user, $request->validated());
+
+        return back()->with('success', sprintf('User "%s" updated.', $user->name));
     }
 
     public function updateRole(UpdateUserRoleRequest $request, UserService $service, User $user): RedirectResponse

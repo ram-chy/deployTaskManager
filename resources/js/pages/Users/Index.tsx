@@ -5,7 +5,7 @@ import Input from '@/components/ui/Input';
 import Modal from '@/components/ui/Modal';
 import Table, { type TableColumn } from '@/components/ui/Table';
 import { Head, Link, router, useForm } from '@inertiajs/react';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { cn } from '@/utils/cn';
 
 interface Role {
@@ -70,19 +70,39 @@ interface UserFormModalProps {
     open: boolean;
     onClose: () => void;
     roles: Role[];
+    editingUser?: UserItem | null;
 }
 
-function UserFormModal({ open, onClose, roles }: UserFormModalProps) {
-    const { data, setData, errors, processing, post, reset } =
+function UserFormModal({ open, onClose, roles, editingUser }: UserFormModalProps) {
+    const { data, setData, errors, processing, post, patch, reset } =
         useForm<UserFormValues>(emptyForm);
+
+    useEffect(() => {
+        if (open) {
+            setData({
+                name: editingUser?.name ?? '',
+                email: editingUser?.email ?? '',
+                password: '',
+                password_confirmation: '',
+                role_id: editingUser?.roles[0]?.id ?? '',
+            });
+        }
+    }, [open, editingUser, setData]);
 
     const submit = (event: React.FormEvent) => {
         event.preventDefault();
 
-        post(route('users.store'), {
-            preserveScroll: true,
-            onSuccess: () => handleClose(),
-        });
+        if (editingUser) {
+            patch(route('users.update', editingUser.id), {
+                preserveScroll: true,
+                onSuccess: () => handleClose(),
+            });
+        } else {
+            post(route('users.store'), {
+                preserveScroll: true,
+                onSuccess: () => handleClose(),
+            });
+        }
     };
 
     const handleClose = () => {
@@ -94,8 +114,12 @@ function UserFormModal({ open, onClose, roles }: UserFormModalProps) {
         <Modal
             open={open}
             onClose={handleClose}
-            title="Add User"
-            description="Create a new user account and assign their role."
+            title={editingUser ? 'Edit User' : 'Add User'}
+            description={
+                editingUser
+                    ? `Update ${editingUser.name}'s profile and role.`
+                    : 'Create a new user account and assign their role.'
+            }
             size="lg"
             footer={
                 <>
@@ -111,7 +135,7 @@ function UserFormModal({ open, onClose, roles }: UserFormModalProps) {
                         form="user-form"
                         loading={processing}
                     >
-                        Create User
+                        {editingUser ? 'Save Changes' : 'Create User'}
                     </Button>
                 </>
             }
@@ -144,7 +168,12 @@ function UserFormModal({ open, onClose, roles }: UserFormModalProps) {
                             setData('password', event.target.value)
                         }
                         error={errors.password}
-                        required
+                        hint={
+                            editingUser
+                                ? 'Leave blank to keep the current password.'
+                                : undefined
+                        }
+                        required={!editingUser}
                     />
                     <Input
                         label="Confirm Password"
@@ -154,7 +183,7 @@ function UserFormModal({ open, onClose, roles }: UserFormModalProps) {
                             setData('password_confirmation', event.target.value)
                         }
                         error={errors.password_confirmation}
-                        required
+                        required={!editingUser}
                     />
                 </div>
 
@@ -192,6 +221,17 @@ function UserFormModal({ open, onClose, roles }: UserFormModalProps) {
 export default function UsersIndex({ users, roles }: UsersProps) {
     const [savingId, setSavingId] = useState<number | null>(null);
     const [formOpen, setFormOpen] = useState(false);
+    const [editingUser, setEditingUser] = useState<UserItem | null>(null);
+
+    const openCreate = () => {
+        setEditingUser(null);
+        setFormOpen(true);
+    };
+
+    const openEdit = (user: UserItem) => {
+        setEditingUser(user);
+        setFormOpen(true);
+    };
 
     const columns = useMemo<Array<TableColumn<UserItem>>>(
         () => [
@@ -259,6 +299,20 @@ export default function UsersIndex({ users, roles }: UsersProps) {
                     <span className="text-gray-500">{user.created_at}</span>
                 ),
             },
+            {
+                key: 'actions',
+                header: 'Actions',
+                cell: (user) => (
+                    <Button
+                        type="button"
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => openEdit(user)}
+                    >
+                        Edit
+                    </Button>
+                ),
+            },
         ],
         [roles, savingId],
     );
@@ -298,7 +352,7 @@ export default function UsersIndex({ users, roles }: UsersProps) {
                         </p>
                     </div>
 
-                    <Button onClick={() => setFormOpen(true)}>New User</Button>
+                    <Button onClick={openCreate}>New User</Button>
                 </div>
 
                 <Table
@@ -352,6 +406,7 @@ export default function UsersIndex({ users, roles }: UsersProps) {
                 open={formOpen}
                 onClose={() => setFormOpen(false)}
                 roles={roles}
+                editingUser={editingUser}
             />
         </AppLayout>
     );
