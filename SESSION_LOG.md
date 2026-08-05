@@ -63,3 +63,61 @@ Alongside the P## vars there are likely-malware startup items (not yet touched �
 1. ~~Confirm the user's own terminal now runs `php artisan serve` without errors~~ — done, the fix is: restart the terminal; verified HTTP 200 in a clean env.
 2. Offer/run the malware cleanup (Defender scan + disable the suspicious startup items listed above).
 3. Project work itself is complete; remaining optional items: off-site backups, CI, go-live prep.
+
+---
+
+# Session Log — 2026-08-04 (Handoff for next session)
+
+## Task
+Check the **whole project to run in Laragon server** (user paused mid-way to resume next day).
+
+## Current project state (verified)
+- `vendor/` — **MISSING** (composer install needed)
+- `node_modules/` — **MISSING** (npm install needed)
+- `public/build/` — **MISSING** (npm run build needed)
+- `.env` — **MISSING** (only `.env.example` exists; copy it → generate APP_KEY)
+- `composer.json` requires **PHP ^8.4** (Laravel 13)
+- `.env.example`: `DB_CONNECTION=mysql`, `DB_HOST=127.0.0.1`, `DB_PORT=3307`, `DB_DATABASE=flexmania`, `DB_USERNAME=root`, `DB_PASSWORD=`, `MYSQLDUMP_PATH="C:/laragon/bin/mysql/mysql-8.4.3-winx64/bin/mysqldump.exe"`, `APP_ENV=production`, `APP_DEBUG=false`, `BROADCAST_CONNECTION=reverb`
+
+## What was fixed today
+
+### 1. System-wide PHP blocker: outdated VC++ runtime (CRITICAL)
+- **Cause:** `C:\WINDOWS\SYSTEM32\VCRUNTIME140.dll` was **14.13** — every PHP binary (both 8.3.26 and 8.4.24) failed with:
+  `PHP Warning: 'C:\WINDOWS\SYSTEM32\VCRUNTIME140.dll' 14.13 is not compatible with this PHP build linked with 14.29/14.44`
+- **Fix:** Installed the latest **Microsoft Visual C++ 2015-2022 Redistributable (x64)** via winget:
+  `winget install Microsoft.VCRedist.2015+.x64 --accept-source-agreements --accept-package-agreements --disable-interactivity --silent`
+  (user approved the UAC prompt)
+- **Verified:** `VCRUNTIME140.dll` is now **14.51.36247.0**; `C:/laragon/bin/php/php-8.4.24-nts-Win32-vs17-x64/php.exe -v` → **PHP 8.4.24** runs clean.
+
+### 2. PHP 8.4 had NO php.ini (no extensions)
+- `C:/laragon/bin/php/php-8.4.24-nts-Win32-vs17-x64/` had only `php.ini-development`/`php.ini-production`; `php.exe --ini` → `Loaded Configuration File: (none)`, so `pdo_mysql`, `mbstring`, `openssl`, etc. were all missing.
+- **Fix:** Created `php.ini` by copying `php.ini-development` and editing:
+  - `extension_dir = "C:/laragon/bin/php/php-8.4.24-nts-Win32-vs17-x64/ext"`
+  - Enabled: `curl, fileinfo, gd, gettext, intl, mbstring, exif, mysqli, openssl, pdo_mysql, pdo_sqlite, soap, sockets, sodium, sqlite3, xsl, zip`
+  - `date.timezone = Asia/Calcutta`
+- **Verified:** `php.exe --ini` loads the new ini; `php.exe -m` shows all the above modules (NOTE: `exif` may not have loaded because the template line has a trailing comment — not required by Laravel, ignore).
+
+### 3. Cleanup
+- Removed a stray `nul` file created in the project root by an earlier shell command (`rm -f nul`).
+
+## NOT yet resolved (next session — in order)
+1. **Set Laragon's active PHP to 8.4.24** (project requires `^8.4`):
+   - Current PATH resolves to `C:\laragon\bin\php\php-8.3.26-Win32-vs16-x64` (8.3.26) — too old.
+   - Update the PATH entry / Laragon's `C:\laragon\usr\profile\default.ini` `[php] Version=` to `php-8.4.24-nts-Win32-vs17-x64` (same approach as the 08-02 session).
+2. **Create `.env`** — copy `.env.example`, then `php artisan key:generate`.
+3. **Start MySQL in Laragon** (currently not running; nothing on ports 3306/3307):
+   - `C:/laragon/bin/mysql/mysql-8.4.3-winx64/` with data dir `C:/laragon/data/mysql-8.4/`.
+   - **PORT MISMATCH to resolve:** `.env` expects **3307**, but `my.ini` has **port=3306**. Check Laragon's GUI settings or edit `my.ini` to 3307 (or change `.env` DB_PORT to match Laragon's actual port). The 08-02 log says MySQL is on 3307 — confirm how Laragon is set to run it.
+4. **Create the `flexmania` database** (root, no password).
+5. **Install dependencies:**
+   - `composer install` (vendor)
+   - `npm install --ignore-scripts` (node_modules)
+   - `npm run build` (public/build)
+6. **Run migrations + seeders:** `php artisan migrate --force` then `php artisan db:seed --force` (demo users admin@flexmania.local / password, manager@..., staff@...; customers; tasks).
+7. **Verify in Laragon:** start services, open the site, log in, check `/dashboard`, `/tasks`, exports (PDF/Excel), notifications.
+
+## Environment notes / caveats
+- After any PHP/PATH change, **restart terminal apps** (Explorer caches the user env at logon).
+- From the 08-02 session: malware (P1–P26 env vars, AutoFlush/Command tasks) was quarantined — if `environment block size exceeds Windows limit of 32767` errors return, re-check `HKCU:\Environment` for `P##` values (payload is now 30,000 chars each; `set`/`findstr` silently skips lines >8190 chars — use PowerShell).
+- `composer` uses PHP 8.3.26 from PATH — switch it to 8.4 before installing (step 1) so `composer install` passes the platform check.
+- Test suite note: phpunit.xml uses in-memory SQLite + `BROADCAST_CONNECTION=null`, so tests don't need MySQL/Reverb.

@@ -1,51 +1,51 @@
 import Button from '@/components/ui/Button';
-import Checkbox from '@/components/ui/Checkbox';
 import Input from '@/components/ui/Input';
 import GuestLayout from '@/layouts/GuestLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { FormEventHandler } from 'react';
 
-export default function Login({
-    status,
-    canResetPassword,
-}: {
-    status?: string;
-    canResetPassword: boolean;
-}) {
+export default function Register() {
     const { data, setData, post, processing, errors, reset } = useForm({
+        name: '',
         email: '',
         password: '',
-        remember: false,
+        password_confirmation: '',
     });
 
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
 
-        post(route('login'), {
-            onFinish: () => reset('password'),
+        post(route('register'), {
+            onFinish: () => reset('password', 'password_confirmation'),
         });
     };
 
     return (
         <GuestLayout>
-            <Head title="Log in" />
+            <Head title="Register" />
 
             <div className="mb-6">
                 <h2 className="text-xl font-semibold text-gray-900">
-                    Sign in to your account
+                    Create your account
                 </h2>
                 <p className="mt-1 text-sm text-gray-500">
-                    Enter your credentials to continue.
+                    Register to start managing your tasks.
                 </p>
             </div>
 
-            {status && (
-                <div className="mb-4 rounded-md bg-green-50 px-3 py-2 text-sm font-medium text-green-700">
-                    {status}
-                </div>
-            )}
-
             <form onSubmit={submit} className="space-y-4">
+                <Input
+                    id="name"
+                    type="text"
+                    name="name"
+                    label="Name"
+                    value={data.name}
+                    autoComplete="name"
+                    autoFocus
+                    onChange={(e) => setData('name', e.target.value)}
+                    error={errors.name}
+                />
+
                 <Input
                     id="email"
                     type="email"
@@ -53,7 +53,6 @@ export default function Login({
                     label="Email"
                     value={data.email}
                     autoComplete="username"
-                    autoFocus
                     onChange={(e) => setData('email', e.target.value)}
                     error={errors.email}
                 />
@@ -64,30 +63,23 @@ export default function Login({
                     name="password"
                     label="Password"
                     value={data.password}
-                    autoComplete="current-password"
+                    autoComplete="new-password"
                     onChange={(e) => setData('password', e.target.value)}
                     error={errors.password}
                 />
 
-                <div className="flex items-center justify-between">
-                    <Checkbox
-                        name="remember"
-                        label="Remember me"
-                        checked={data.remember}
-                        onChange={(e) =>
-                            setData('remember', e.target.checked)
-                        }
-                    />
-
-                    {canResetPassword && (
-                        <Link
-                            href={route('password.request')}
-                            className="text-sm font-medium text-primary-600 hover:text-primary-700"
-                        >
-                            Forgot your password?
-                        </Link>
-                    )}
-                </div>
+                <Input
+                    id="password_confirmation"
+                    type="password"
+                    name="password_confirmation"
+                    label="Confirm Password"
+                    value={data.password_confirmation}
+                    autoComplete="new-password"
+                    onChange={(e) =>
+                        setData('password_confirmation', e.target.value)
+                    }
+                    error={errors.password_confirmation}
+                />
 
                 <Button
                     type="submit"
@@ -95,17 +87,17 @@ export default function Login({
                     loading={processing}
                     disabled={processing}
                 >
-                    Log in
+                    Register
                 </Button>
             </form>
 
             <p className="mt-6 text-center text-sm text-gray-500">
-                Don't have an account?{' '}
+                Already have an account?{' '}
                 <Link
-                    href={route('register')}
+                    href={route('login')}
                     className="font-medium text-primary-600 hover:text-primary-700"
                 >
-                    Register
+                    Log in
                 </Link>
             </p>
         </GuestLayout>
