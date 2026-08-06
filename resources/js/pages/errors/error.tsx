@@ -55,7 +55,7 @@ export default function ErrorPage({ status }: { status: number }) {
             </p>
 
             <Link
-                href="/"
+                href={route('welcome')}
                 className="mt-8 rounded-md bg-primary-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-primary-700"
             >
                 Back to Home

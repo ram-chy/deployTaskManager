@@ -25,7 +25,7 @@ class TaskSeeder extends Seeder
             [
                 'title' => 'Prepare quarterly client report',
                 'description' => 'Compile metrics and send the summary to Acme Corporation.',
-                'status' => TaskStatus::InProgress,
+                'status' => TaskStatus::SendForApprove,
                 'priority' => TaskPriority::High,
                 'due_date' => now()->addDays(2)->toDateString(),
                 'assignee_id' => $staff->id,
@@ -35,7 +35,7 @@ class TaskSeeder extends Seeder
             [
                 'title' => 'Update office contact list',
                 'description' => null,
-                'status' => TaskStatus::Pending,
+                'status' => TaskStatus::SubmitForDesign,
                 'priority' => TaskPriority::Low,
                 'due_date' => now()->addWeek()->toDateString(),
                 'assignee_id' => $staff->id,
@@ -45,7 +45,7 @@ class TaskSeeder extends Seeder
             [
                 'title' => 'Follow up on invoice #1042',
                 'description' => 'Customer reported they never received the invoice.',
-                'status' => TaskStatus::Pending,
+                'status' => TaskStatus::SubmitForDesign,
                 'priority' => TaskPriority::High,
                 'due_date' => today()->subDay()->toDateString(),
                 'assignee_id' => $manager->id,
@@ -55,7 +55,7 @@ class TaskSeeder extends Seeder
             [
                 'title' => 'Review onboarding checklist',
                 'description' => 'Walk through the new hire onboarding steps with the team.',
-                'status' => TaskStatus::Completed,
+                'status' => TaskStatus::PrintComplete,
                 'priority' => TaskPriority::Medium,
                 'due_date' => now()->subDays(3)->toDateString(),
                 'assignee_id' => $admin->id,
@@ -65,7 +65,7 @@ class TaskSeeder extends Seeder
             [
                 'title' => 'Draft service agreement renewal',
                 'description' => 'Prepare the renewal draft for Stark Industries.',
-                'status' => TaskStatus::Pending,
+                'status' => TaskStatus::SubmitForDesign,
                 'priority' => TaskPriority::Medium,
                 'due_date' => now()->addDays(6)->toDateString(),
                 'assignee_id' => $manager->id,
@@ -75,7 +75,7 @@ class TaskSeeder extends Seeder
             [
                 'title' => 'Clean up shared drive',
                 'description' => 'Archive files older than 12 months.',
-                'status' => TaskStatus::InProgress,
+                'status' => TaskStatus::Approved,
                 'priority' => TaskPriority::Low,
                 'due_date' => now()->addDays(10)->toDateString(),
                 'assignee_id' => $staff->id,
@@ -85,7 +85,7 @@ class TaskSeeder extends Seeder
             [
                 'title' => 'Fix login bug on portal',
                 'description' => 'Users cannot reset passwords after the last deploy.',
-                'status' => TaskStatus::InProgress,
+                'status' => TaskStatus::SendForPrint,
                 'priority' => TaskPriority::High,
                 'due_date' => today()->toDateString(),
                 'assignee_id' => $staff->id,
@@ -95,7 +95,7 @@ class TaskSeeder extends Seeder
             [
                 'title' => 'Schedule team training session',
                 'description' => null,
-                'status' => TaskStatus::Completed,
+                'status' => TaskStatus::PrintComplete,
                 'priority' => TaskPriority::Medium,
                 'due_date' => now()->subDay()->toDateString(),
                 'assignee_id' => $manager->id,

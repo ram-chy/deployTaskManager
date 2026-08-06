@@ -60,6 +60,7 @@ class TaskPolicy
      */
     public function updateStatus(User $user, Task $task): bool
     {
-        return $user->isAdmin() || $user->isManager() || $task->assignee_id === $user->id;
+        return ! $task->isCompleted()
+            && ($user->isAdmin() || $user->isManager() || $task->assignee_id === $user->id);
     }
 }

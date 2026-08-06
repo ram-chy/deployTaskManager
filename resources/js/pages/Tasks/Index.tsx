@@ -56,17 +56,27 @@ interface TaskFormValues {
 const emptyForm: TaskFormValues = {
     title: '',
     description: '',
-    status: 'pending',
+    status: 'submit_for_design',
     priority: 'medium',
     due_date: '',
     assignee_id: '',
     customer_id: '',
 };
 
+const statusLabel: Record<TaskStatus, string> = {
+    submit_for_design: 'Submit For Design',
+    send_for_approve: 'Send for Approve',
+    approved: 'Approved',
+    send_for_print: 'Send for Print',
+    print_complete: 'Print Complete',
+};
+
 const statusOptions: Array<{ value: TaskStatus; label: string }> = [
-    { value: 'pending', label: 'Pending' },
-    { value: 'in_progress', label: 'In Progress' },
-    { value: 'completed', label: 'Completed' },
+    { value: 'submit_for_design', label: 'Submit For Design' },
+    { value: 'send_for_approve', label: 'Send for Approve' },
+    { value: 'approved', label: 'Approved' },
+    { value: 'send_for_print', label: 'Send for Print' },
+    { value: 'print_complete', label: 'Print Complete' },
 ];
 
 const priorityOptions: Array<{ value: TaskPriority; label: string }> = [
@@ -76,9 +86,23 @@ const priorityOptions: Array<{ value: TaskPriority; label: string }> = [
 ];
 
 const statusVariant: Record<TaskStatus, BadgeVariant> = {
-    pending: 'warning',
-    in_progress: 'info',
-    completed: 'success',
+    submit_for_design: 'warning',
+    send_for_approve: 'info',
+    approved: 'success',
+    send_for_print: 'primary',
+    print_complete: 'neutral',
+};
+
+const nextTransition: Partial<
+    Record<TaskStatus, { status: TaskStatus; label: string }>
+> = {
+    submit_for_design: {
+        status: 'send_for_approve',
+        label: 'Send for Approve',
+    },
+    send_for_approve: { status: 'approved', label: 'Approve' },
+    approved: { status: 'send_for_print', label: 'Send for Print' },
+    send_for_print: { status: 'print_complete', label: 'Print Complete' },
 };
 
 const priorityVariant: Record<TaskPriority, BadgeVariant> = {
@@ -528,10 +552,7 @@ export default function TasksIndex({
                 header: 'Status',
                 cell: (task) => (
                     <Badge variant={statusVariant[task.status]}>
-                        {task.status === 'in_progress'
-                            ? 'In Progress'
-                            : task.status.charAt(0).toUpperCase() +
-                              task.status.slice(1)}
+                        {statusLabel[task.status]}
                     </Badge>
                 ),
             },
@@ -594,27 +615,19 @@ export default function TasksIndex({
                 header: 'Actions',
                 className: 'text-right',
                 headerClassName: 'text-right',
-                cell: (task) => (
-                    <div className="flex items-center justify-end gap-1.5">
-                        {task.status === 'pending' && task.can_transition && (
-                            <Button
-                                size="sm"
-                                variant="outline"
-                                loading={transitioningId === task.id}
-                                onClick={() => transition(task, 'in_progress')}
-                            >
-                                Start
-                            </Button>
-                        )}
-                        {task.status === 'in_progress' &&
-                            task.can_transition && (
+                cell: (task) => {
+                    const next = nextTransition[task.status];
+
+                    return (
+                        <div className="flex items-center justify-end gap-1.5">
+                            {next && task.can_transition && (
                                 <Button
                                     size="sm"
                                     variant="outline"
                                     loading={transitioningId === task.id}
-                                    onClick={() => transition(task, 'completed')}
+                                    onClick={() => transition(task, next.status)}
                                 >
-                                    Complete
+                                    {next.label}
                                 </Button>
                             )}
                         {task.can_edit && (
@@ -636,8 +649,9 @@ export default function TasksIndex({
                                 Delete
                             </Button>
                         )}
-                    </div>
-                ),
+                        </div>
+                    );
+                },
             },
         ],
         [can.create, can.delete, transitioningId],

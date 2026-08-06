@@ -83,7 +83,8 @@ class TaskService extends AbstractService
     }
 
     /**
-     * Move a task forward in the workflow (pending → in_progress → completed).
+     * Move a task forward in the workflow
+     * (submit_for_design → send_for_approve → approved → send_for_print → print_complete).
      */
     public function transitionStatus(Task $task, TaskStatus $status): Task
     {

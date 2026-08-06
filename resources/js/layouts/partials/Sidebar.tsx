@@ -69,7 +69,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
     const navItems: NavItem[] = [
         {
             label: 'Dashboard',
-            href: '/dashboard',
+            href: route('dashboard'),
             active: () => route().current('dashboard'),
             icon: (
                 <svg
@@ -90,13 +90,13 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
         },
         {
             label: 'Tasks',
-            href: '/tasks',
+            href: route('tasks.index'),
             active: () => route().current('tasks.index'),
             icon: tasksIcon,
         },
         {
             label: 'Customers',
-            href: '/customers',
+            href: route('customers.index'),
             active: () => route().current('customers.index'),
             icon: customersIcon,
         },

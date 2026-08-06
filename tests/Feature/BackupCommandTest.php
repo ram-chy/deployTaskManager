@@ -9,36 +9,44 @@ class BackupCommandTest extends TestCase
 {
     use RefreshDatabase;
 
+    private string $backupDirectory;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->backupDirectory = sys_get_temp_dir().'/flexmania-backup-test-'.uniqid();
+        mkdir($this->backupDirectory, 0777, true);
+
+        config(['database.backup.path' => $this->backupDirectory]);
+    }
+
     protected function tearDown(): void
     {
-        foreach (glob(storage_path('app/backups/backup-*.sql')) as $file) {
+        foreach (glob($this->backupDirectory.'/backup-*.sql') ?: [] as $file) {
             @unlink($file);
         }
+
+        @rmdir($this->backupDirectory);
 
         parent::tearDown();
     }
 
     public function test_command_prunes_old_backups_and_keeps_latest(): void
     {
-        $directory = storage_path('app/backups');
-
-        if (! is_dir($directory)) {
-            mkdir($directory, 0755, true);
-        }
-
         foreach (['2026-01-01-010000', '2026-01-02-010000', '2026-01-03-010000'] as $timestamp) {
-            touch($directory.'/backup-'.$timestamp.'.sql');
+            touch($this->backupDirectory.'/backup-'.$timestamp.'.sql');
         }
 
-        touch($directory.'/backup-2026-01-04-010000.sql');
-        touch($directory.'/backup-2026-01-05-010000.sql');
+        touch($this->backupDirectory.'/backup-2026-01-04-010000.sql');
+        touch($this->backupDirectory.'/backup-2026-01-05-010000.sql');
 
         $this->artisan('backup:database', ['--keep' => 2])
             ->expectsOutputToContain('Skipping dump')
             ->expectsOutputToContain('Pruned 3 old backup(s).')
             ->assertSuccessful();
 
-        $remaining = array_map('basename', glob($directory.'/backup-*.sql'));
+        $remaining = array_map('basename', glob($this->backupDirectory.'/backup-*.sql'));
 
         $this->assertCount(2, $remaining);
         $this->assertContains('backup-2026-01-05-010000.sql', $remaining);
@@ -51,18 +59,20 @@ class BackupCommandTest extends TestCase
         $default = config('database.default');
         $mysql = config('database.connections.mysql');
         $binary = config('database.backup.mysqldump');
+        $path = config('database.backup.path');
 
         config([
             'database.default' => 'mysql',
             'database.connections.mysql' => [
                 'driver' => 'mysql',
                 'host' => '127.0.0.1',
-                'port' => '3307',
+                'port' => '3306',
                 'database' => 'flexmania',
                 'username' => 'root',
                 'password' => '',
             ],
             'database.backup.mysqldump' => 'C:\\does-not-exist\\mysqldump.exe',
+            'database.backup.path' => $this->backupDirectory,
         ]);
 
         try {
@@ -74,9 +84,10 @@ class BackupCommandTest extends TestCase
                 'database.default' => $default,
                 'database.connections.mysql' => $mysql,
                 'database.backup.mysqldump' => $binary,
+                'database.backup.path' => $path,
             ]);
         }
 
-        $this->assertSame([], glob(storage_path('app/backups/backup-*.sql')) ?: []);
+        $this->assertSame([], glob($this->backupDirectory.'/backup-*.sql') ?: []);
     }
 }

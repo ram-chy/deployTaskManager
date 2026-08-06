@@ -33,19 +33,29 @@ class TaskFactory extends Factory
         ];
     }
 
-    public function pending(): static
+    public function submittedForDesign(): static
     {
-        return $this->state(fn (): array => ['status' => TaskStatus::Pending]);
+        return $this->state(fn (): array => ['status' => TaskStatus::SubmitForDesign]);
     }
 
-    public function inProgress(): static
+    public function sendForApprove(): static
     {
-        return $this->state(fn (): array => ['status' => TaskStatus::InProgress]);
+        return $this->state(fn (): array => ['status' => TaskStatus::SendForApprove]);
     }
 
-    public function completed(): static
+    public function approved(): static
     {
-        return $this->state(fn (): array => ['status' => TaskStatus::Completed]);
+        return $this->state(fn (): array => ['status' => TaskStatus::Approved]);
+    }
+
+    public function sendForPrint(): static
+    {
+        return $this->state(fn (): array => ['status' => TaskStatus::SendForPrint]);
+    }
+
+    public function printCompleted(): static
+    {
+        return $this->state(fn (): array => ['status' => TaskStatus::PrintComplete]);
     }
 
     public function assignedTo(User $user): static

@@ -5,9 +5,19 @@ import type { DashboardStats, Task, TaskStatus } from '@/types';
 import type { ReactNode } from 'react';
 
 const statusVariant: Record<TaskStatus, BadgeVariant> = {
-    pending: 'warning',
-    in_progress: 'info',
-    completed: 'success',
+    submit_for_design: 'warning',
+    send_for_approve: 'info',
+    approved: 'success',
+    send_for_print: 'primary',
+    print_complete: 'neutral',
+};
+
+const statusLabel: Record<TaskStatus, string> = {
+    submit_for_design: 'Submit For Design',
+    send_for_approve: 'Send for Approve',
+    approved: 'Approved',
+    send_for_print: 'Send for Print',
+    print_complete: 'Print Complete',
 };
 
 interface StatCard {
@@ -25,9 +35,9 @@ interface DashboardProps {
 
 const statCards: StatCard[] = [
     {
-        key: 'pending',
-        label: 'Pending Tasks',
-        href: route('tasks.index', { status: 'pending' }),
+        key: 'submit_for_design',
+        label: 'Submit For Design',
+        href: route('tasks.index', { status: 'submit_for_design' }),
         accent: 'bg-amber-50 text-amber-600',
         icon: (
             <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -38,21 +48,20 @@ const statCards: StatCard[] = [
         ),
     },
     {
-        key: 'in_progress',
-        label: 'In Progress',
-        href: route('tasks.index', { status: 'in_progress' }),
-        accent: 'bg-primary-50 text-primary-600',
+        key: 'send_for_approve',
+        label: 'Send for Approve',
+        href: route('tasks.index', { status: 'send_for_approve' }),
+        accent: 'bg-sky-50 text-sky-600',
         icon: (
             <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="9" />
-                <path d="M12 7v5l3 3" />
+                <path d="M17 3a2.83 2.83 0 114 4L7.5 20.5 2 22l1.5-5.5L17 3z" />
             </svg>
         ),
     },
     {
-        key: 'completed',
-        label: 'Completed',
-        href: route('tasks.index', { status: 'completed' }),
+        key: 'approved',
+        label: 'Approved',
+        href: route('tasks.index', { status: 'approved' }),
         accent: 'bg-green-50 text-green-600',
         icon: (
             <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -62,10 +71,36 @@ const statCards: StatCard[] = [
         ),
     },
     {
+        key: 'send_for_print',
+        label: 'Send for Print',
+        href: route('tasks.index', { status: 'send_for_print' }),
+        accent: 'bg-primary-50 text-primary-600',
+        icon: (
+            <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M6 9V3h12v6" />
+                <rect x="6" y="14" width="12" height="7" rx="1" />
+                <path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2" />
+            </svg>
+        ),
+    },
+    {
+        key: 'print_complete',
+        label: 'Print Complete',
+        href: route('tasks.index', { status: 'print_complete' }),
+        accent: 'bg-gray-100 text-gray-600',
+        icon: (
+            <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M20 6H9a2 2 0 01-2-2V3a2 2 0 012-2h11a2 2 0 012 2v1a2 2 0 01-2 2z" />
+                <path d="M2 10h20v6a2 2 0 01-2 2h-2v4H6v-4H4a2 2 0 01-2-2v-6z" />
+                <path d="M16 16h.01" />
+            </svg>
+        ),
+    },
+    {
         key: 'today',
         label: "Today's Tasks",
         href: route('tasks.index'),
-        accent: 'bg-sky-50 text-sky-600',
+        accent: 'bg-rose-50 text-rose-600',
         icon: (
             <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                 <rect x="3" y="4" width="18" height="18" rx="2" />
@@ -192,10 +227,7 @@ export default function Dashboard({ stats, recentActivities }: DashboardProps) {
                                         </div>
                                     </div>
                                     <Badge variant={statusVariant[activity.status]}>
-                                        {activity.status === 'in_progress'
-                                            ? 'In Progress'
-                                            : activity.status.charAt(0).toUpperCase() +
-                                              activity.status.slice(1)}
+                                        {statusLabel[activity.status]}
                                     </Badge>
                                 </li>
                             ))}

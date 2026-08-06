@@ -17,9 +17,11 @@ class DashboardController extends Controller
 
         return Inertia::render('Dashboard', [
             'stats' => [
-                'pending' => $counts[TaskStatus::Pending->value] ?? 0,
-                'in_progress' => $counts[TaskStatus::InProgress->value] ?? 0,
-                'completed' => $counts[TaskStatus::Completed->value] ?? 0,
+                'submit_for_design' => $counts[TaskStatus::SubmitForDesign->value] ?? 0,
+                'send_for_approve' => $counts[TaskStatus::SendForApprove->value] ?? 0,
+                'approved' => $counts[TaskStatus::Approved->value] ?? 0,
+                'send_for_print' => $counts[TaskStatus::SendForPrint->value] ?? 0,
+                'print_complete' => $counts[TaskStatus::PrintComplete->value] ?? 0,
                 'today' => $service->getTodaysTaskCount(),
             ],
             'recentActivities' => TaskResource::collection(

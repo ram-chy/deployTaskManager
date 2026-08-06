@@ -57,12 +57,12 @@ class Task extends Model
     public function isOverdue(): bool
     {
         return $this->due_date !== null
-            && $this->status !== TaskStatus::Completed
+            && $this->status !== TaskStatus::PrintComplete
             && $this->due_date->isBefore(today());
     }
 
     public function isCompleted(): bool
     {
-        return $this->status === TaskStatus::Completed;
+        return $this->status === TaskStatus::PrintComplete;
     }
 }

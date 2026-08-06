@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\RegisterRequest;
-use App\Models\Role;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
@@ -34,7 +33,7 @@ class RegisteredUserController extends Controller
         ]);
 
         // Newly registered users are regular staff members.
-        $user->assignRole(Role::where('slug', 'staff')->valueOrFail('slug'));
+        $user->assignRole('staff');
 
         event(new Registered($user));
 

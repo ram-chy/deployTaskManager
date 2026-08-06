@@ -15,7 +15,12 @@ export interface Customer {
     updated_at: string;
 }
 
-export type TaskStatus = 'pending' | 'in_progress' | 'completed';
+export type TaskStatus =
+    | 'submit_for_design'
+    | 'send_for_approve'
+    | 'approved'
+    | 'send_for_print'
+    | 'print_complete';
 
 export type TaskPriority = 'low' | 'medium' | 'high';
 
@@ -45,9 +50,11 @@ export interface Task {
 }
 
 export interface DashboardStats {
-    pending: number;
-    in_progress: number;
-    completed: number;
+    submit_for_design: number;
+    send_for_approve: number;
+    approved: number;
+    send_for_print: number;
+    print_complete: number;
     today: number;
 }
 

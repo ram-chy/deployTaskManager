@@ -34,7 +34,7 @@ class NotificationTest extends TestCase
 
         $this->actingAs($manager)->post('/tasks', [
             'title' => 'Broadcast me',
-            'status' => TaskStatus::Pending->value,
+            'status' => TaskStatus::SubmitForDesign->value,
             'priority' => TaskPriority::Medium->value,
         ]);
 
@@ -50,20 +50,20 @@ class NotificationTest extends TestCase
         $manager = User::factory()->create();
         $manager->assignRole('manager');
 
-        $task = Task::factory()->pending()->create();
+        $task = Task::factory()->submittedForDesign()->create();
 
         Event::fake([TaskStatusUpdated::class]);
 
         $this->actingAs($manager)
             ->patch(route('tasks.status.update', $task), [
-                'status' => TaskStatus::InProgress->value,
+                'status' => TaskStatus::SendForApprove->value,
             ]);
 
         Event::assertDispatched(
             TaskStatusUpdated::class,
             fn (TaskStatusUpdated $event): bool => $event->task->is($task)
-                && $event->oldStatus === TaskStatus::Pending->value
-                && $event->newStatus === TaskStatus::InProgress->value,
+                && $event->oldStatus === TaskStatus::SubmitForDesign->value
+                && $event->newStatus === TaskStatus::SendForApprove->value,
         );
     }
 
@@ -76,7 +76,7 @@ class NotificationTest extends TestCase
 
         $this->actingAs($manager)->post('/tasks', [
             'title' => 'For you',
-            'status' => TaskStatus::Pending->value,
+            'status' => TaskStatus::SubmitForDesign->value,
             'priority' => TaskPriority::High->value,
             'assignee_id' => $assignee->id,
         ]);
@@ -93,7 +93,7 @@ class NotificationTest extends TestCase
 
         $this->actingAs($manager)->post('/tasks', [
             'title' => 'Unassigned',
-            'status' => TaskStatus::Pending->value,
+            'status' => TaskStatus::SubmitForDesign->value,
             'priority' => TaskPriority::Low->value,
         ]);
 
@@ -108,12 +108,12 @@ class NotificationTest extends TestCase
         $oldAssignee = User::factory()->create();
         $newAssignee = User::factory()->create();
 
-        $task = Task::factory()->pending()->assignedTo($oldAssignee)->create();
+        $task = Task::factory()->submittedForDesign()->assignedTo($oldAssignee)->create();
 
         $this->actingAs($admin)
             ->patch(route('tasks.update', $task), [
                 'title' => $task->title,
-                'status' => TaskStatus::Pending->value,
+                'status' => TaskStatus::SubmitForDesign->value,
                 'priority' => TaskPriority::Medium->value,
                 'assignee_id' => $newAssignee->id,
             ]);
@@ -128,15 +128,15 @@ class NotificationTest extends TestCase
         $admin->assignRole('admin');
 
         $assignee = User::factory()->create();
-        $task = Task::factory()->pending()->assignedTo($assignee)->create();
+        $task = Task::factory()->submittedForDesign()->assignedTo($assignee)->create();
 
         $this->actingAs($admin)
             ->patch(route('tasks.status.update', $task), [
-                'status' => TaskStatus::InProgress->value,
+                'status' => TaskStatus::SendForApprove->value,
             ]);
 
         $this->assertSame(1, $assignee->unreadNotifications()->count());
-        $this->assertStringContainsString('In Progress', $assignee->notifications->first()->data['message']);
+        $this->assertStringContainsString('Send for Approve', $assignee->notifications->first()->data['message']);
     }
 
     public function test_notifications_index_requires_authentication(): void
@@ -148,7 +148,7 @@ class NotificationTest extends TestCase
     {
         $user = User::factory()->create();
 
-        $task = Task::factory()->pending()->assignedTo($user)->create();
+        $task = Task::factory()->submittedForDesign()->assignedTo($user)->create();
         $user->notify(new TaskAssignedNotification($task));
 
         $this->actingAs($user)
@@ -163,7 +163,7 @@ class NotificationTest extends TestCase
     {
         $user = User::factory()->create();
 
-        $task = Task::factory()->pending()->assignedTo($user)->create();
+        $task = Task::factory()->submittedForDesign()->assignedTo($user)->create();
         $user->notify(new TaskAssignedNotification($task));
 
         $this->actingAs($user)

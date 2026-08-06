@@ -12,7 +12,7 @@ return new class extends Migration
             $table->id();
             $table->string('title');
             $table->text('description')->nullable();
-            $table->string('status')->default('pending');
+            $table->string('status')->default('submit_for_design');
             $table->string('priority')->default('medium');
             $table->date('due_date')->nullable();
             $table->foreignId('assignee_id')->nullable()->constrained('users')->nullOnDelete();

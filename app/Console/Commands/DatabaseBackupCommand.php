@@ -14,7 +14,7 @@ class DatabaseBackupCommand extends Command
 
     public function handle(): int
     {
-        $directory = storage_path('app/backups');
+        $directory = config('database.backup.path', storage_path('app/backups'));
         $this->ensureDirectory($directory);
 
         $exitCode = 0;

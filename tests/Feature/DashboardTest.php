@@ -27,9 +27,11 @@ class DashboardTest extends TestCase
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
                 ->component('Dashboard')
-                ->where('stats.pending', 0)
-                ->where('stats.in_progress', 0)
-                ->where('stats.completed', 0)
+                ->where('stats.submit_for_design', 0)
+                ->where('stats.send_for_approve', 0)
+                ->where('stats.approved', 0)
+                ->where('stats.send_for_print', 0)
+                ->where('stats.print_complete', 0)
                 ->where('stats.today', 0)
                 ->where('recentActivities', []));
     }
@@ -38,31 +40,33 @@ class DashboardTest extends TestCase
     {
         $user = User::factory()->create();
 
-        Task::factory()->pending()->create(['due_date' => null]);
-        Task::factory()->pending()->create(['due_date' => null]);
-        Task::factory()->inProgress()->create(['due_date' => null]);
-        Task::factory()->completed()->create(['due_date' => null]);
+        Task::factory()->submittedForDesign()->create(['due_date' => null]);
+        Task::factory()->submittedForDesign()->create(['due_date' => null]);
+        Task::factory()->sendForApprove()->create(['due_date' => null]);
+        Task::factory()->printCompleted()->create(['due_date' => null]);
 
         Task::factory()->create([
-            'status' => TaskStatus::Pending,
+            'status' => TaskStatus::SubmitForDesign,
             'due_date' => today(),
         ]);
 
         $this->actingAs($user)
             ->get('/dashboard')
             ->assertInertia(fn (Assert $page) => $page
-                ->where('stats.pending', 3)
-                ->where('stats.in_progress', 1)
-                ->where('stats.completed', 1)
+                ->where('stats.submit_for_design', 3)
+                ->where('stats.send_for_approve', 1)
+                ->where('stats.approved', 0)
+                ->where('stats.send_for_print', 0)
+                ->where('stats.print_complete', 1)
                 ->where('stats.today', 1));
     }
 
-    public function test_completed_tasks_due_today_are_not_counted_as_today(): void
+    public function test_print_complete_tasks_due_today_are_not_counted_as_today(): void
     {
         $user = User::factory()->create();
 
         Task::factory()->create([
-            'status' => TaskStatus::Completed,
+            'status' => TaskStatus::PrintComplete,
             'due_date' => today(),
         ]);
 
@@ -76,16 +80,16 @@ class DashboardTest extends TestCase
         $user = User::factory()->create();
         $assignee = User::factory()->create();
 
-        $first = Task::factory()->pending()->assignedTo($assignee)->create();
+        $first = Task::factory()->submittedForDesign()->assignedTo($assignee)->create();
         $first->forceFill(['updated_at' => now()->subMinutes(5)])->save();
 
-        $latest = Task::factory()->inProgress()->assignedTo($assignee)->create();
+        $latest = Task::factory()->sendForApprove()->assignedTo($assignee)->create();
 
         $this->actingAs($user)
             ->get('/dashboard')
             ->assertInertia(fn (Assert $page) => $page
                 ->where('recentActivities.0.id', $latest->id)
-                ->where('recentActivities.0.status', TaskStatus::InProgress->value)
+                ->where('recentActivities.0.status', TaskStatus::SendForApprove->value)
                 ->where('recentActivities.0.title', $latest->title)
                 ->where('recentActivities.0.assignee.name', $assignee->name)
                 ->where('recentActivities.1.id', $first->id)

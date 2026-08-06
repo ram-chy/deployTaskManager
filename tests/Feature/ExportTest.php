@@ -74,24 +74,24 @@ class ExportTest extends TestCase
         $staff = User::factory()->create();
         $staff->assignRole('staff');
         Task::factory()->create([
-            'title' => 'Pending only task',
-            'description' => 'Pending only description',
-            'status' => TaskStatus::Pending,
+            'title' => 'Submit For Design only task',
+            'description' => 'Submit For Design only description',
+            'status' => TaskStatus::SubmitForDesign,
         ]);
         Task::factory()->create([
-            'title' => 'Completed hidden task',
-            'description' => 'Completed hidden description',
-            'status' => TaskStatus::Completed,
+            'title' => 'Print Complete hidden task',
+            'description' => 'Print Complete hidden description',
+            'status' => TaskStatus::PrintComplete,
         ]);
 
         $response = $this->actingAs($staff)->get(route('tasks.export.excel', [
-            'status' => TaskStatus::Pending->value,
+            'status' => TaskStatus::SubmitForDesign->value,
         ]));
 
         $descriptions = array_column($this->spreadsheetRows($response->streamedContent()), 3);
 
-        $this->assertContains('Pending only description', $descriptions);
-        $this->assertNotContains('Completed hidden description', $descriptions);
+        $this->assertContains('Submit For Design only description', $descriptions);
+        $this->assertNotContains('Print Complete hidden description', $descriptions);
     }
 
     public function test_excel_export_includes_status_label(): void
@@ -101,7 +101,7 @@ class ExportTest extends TestCase
         Task::factory()->create([
             'title' => 'Label check task',
             'description' => 'Label check description',
-            'status' => TaskStatus::InProgress,
+            'status' => TaskStatus::SendForApprove,
             'priority' => TaskPriority::High,
         ]);
 
@@ -111,7 +111,7 @@ class ExportTest extends TestCase
         $row = collect($rows)->first(fn (array $row): bool => $row[3] === 'Label check description');
 
         $this->assertNotNull($row);
-        $this->assertSame('In Progress', $row[4]);
+        $this->assertSame('Send for Approve', $row[4]);
     }
 
     public function test_excel_export_respects_created_date_range(): void

@@ -30,7 +30,7 @@ class DashboardService extends AbstractService
     {
         return Task::query()
             ->whereDate('due_date', today())
-            ->where('status', '!=', TaskStatus::Completed)
+            ->where('status', '!=', TaskStatus::PrintComplete)
             ->count();
     }
 
