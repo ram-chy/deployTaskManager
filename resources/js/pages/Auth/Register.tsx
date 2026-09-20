@@ -25,10 +25,10 @@ export default function Register() {
             <Head title="Register" />
 
             <div className="mb-6">
-                <h2 className="text-xl font-semibold text-gray-900">
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
                     Create your account
                 </h2>
-                <p className="mt-1 text-sm text-gray-500">
+                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
                     Register to start managing your tasks.
                 </p>
             </div>
@@ -91,11 +91,11 @@ export default function Register() {
                 </Button>
             </form>
 
-            <p className="mt-6 text-center text-sm text-gray-500">
+            <p className="mt-6 text-center text-sm text-gray-500 dark:text-gray-400">
                 Already have an account?{' '}
                 <Link
                     href={route('login')}
-                    className="font-medium text-primary-600 hover:text-primary-700"
+                    className="font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300"
                 >
                     Log in
                 </Link>

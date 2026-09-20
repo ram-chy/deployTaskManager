@@ -35,7 +35,7 @@ class TaskTest extends TestCase
 
         $assignee = User::factory()->create();
         $task = Task::factory()
-            ->submittedForDesign()
+            ->pending()
             ->assignedTo($assignee)
             ->create(['due_date' => now()->addWeek()->toDateString()]);
 
@@ -47,7 +47,7 @@ class TaskTest extends TestCase
                 ->where('can.create', false)
                 ->where('can.delete', false)
                 ->where('tasks.data.0.id', $task->id)
-                ->where('tasks.data.0.status', TaskStatus::SubmitForDesign->value)
+                ->where('tasks.data.0.status', TaskStatus::Pending->value)
                 ->where('tasks.data.0.assignee.name', $assignee->name)
                 ->where('tasks.data.0.is_overdue', false)
                 ->where('tasks.data.0.can_transition', false));
@@ -61,7 +61,7 @@ class TaskTest extends TestCase
         $this->actingAs($staff)
             ->post('/tasks', [
                 'title' => 'Nope',
-                'status' => TaskStatus::SubmitForDesign->value,
+                'status' => TaskStatus::Pending->value,
                 'priority' => 'medium',
             ])
             ->assertForbidden();
@@ -80,7 +80,7 @@ class TaskTest extends TestCase
             ->post('/tasks', [
                 'title' => 'Prepare proposal',
                 'description' => 'Draft the proposal for the client.',
-                'status' => TaskStatus::SubmitForDesign->value,
+                'status' => TaskStatus::Pending->value,
                 'priority' => 'high',
                 'due_date' => now()->addDays(3)->toDateString(),
                 'assignee_id' => $manager->id,
@@ -91,7 +91,7 @@ class TaskTest extends TestCase
 
         $this->assertDatabaseHas('tasks', [
             'title' => 'Prepare proposal',
-            'status' => TaskStatus::SubmitForDesign->value,
+            'status' => TaskStatus::Pending->value,
             'priority' => 'high',
             'created_by' => $manager->id,
         ]);
@@ -122,7 +122,7 @@ class TaskTest extends TestCase
         $this->actingAs($staff)
             ->patch(route('tasks.update', $task), [
                 'title' => 'Hacked',
-                'status' => TaskStatus::SubmitForDesign->value,
+                'status' => TaskStatus::Pending->value,
                 'priority' => 'medium',
             ])
             ->assertForbidden();
@@ -135,12 +135,12 @@ class TaskTest extends TestCase
         $admin = User::factory()->create();
         $admin->assignRole('admin');
 
-        $task = Task::factory()->submittedForDesign()->create();
+        $task = Task::factory()->pending()->create();
 
         $this->actingAs($admin)
             ->patch(route('tasks.update', $task), [
                 'title' => 'Updated Title',
-                'status' => TaskStatus::SendForApprove->value,
+                'status' => TaskStatus::InProgress->value,
                 'priority' => 'low',
             ])
             ->assertRedirect()
@@ -149,7 +149,7 @@ class TaskTest extends TestCase
         $task->refresh();
 
         $this->assertSame('Updated Title', $task->title);
-        $this->assertSame(TaskStatus::SendForApprove, $task->status);
+        $this->assertSame(TaskStatus::InProgress, $task->status);
     }
 
     public function test_only_admins_can_delete_tasks(): void
@@ -171,7 +171,7 @@ class TaskTest extends TestCase
         $admin = User::factory()->create();
         $admin->assignRole('admin');
 
-        $task = Task::factory()->submittedForDesign()->create();
+        $task = Task::factory()->pending()->create();
 
         $this->actingAs($admin)
             ->delete(route('tasks.destroy', $task))
@@ -186,32 +186,49 @@ class TaskTest extends TestCase
         $staff = User::factory()->create();
         $staff->assignRole('staff');
 
-        $task = Task::factory()->submittedForDesign()->assignedTo($staff)->create();
+        $task = Task::factory()->pending()->assignedTo($staff)->create();
 
         $this->actingAs($staff)
             ->patch(route('tasks.status.update', $task), [
-                'status' => TaskStatus::SendForApprove->value,
+                'status' => TaskStatus::InProgress->value,
             ])
             ->assertRedirect()
             ->assertSessionHas('success');
 
-        $this->assertSame(TaskStatus::SendForApprove, $task->refresh()->status);
+        $this->assertSame(TaskStatus::InProgress, $task->refresh()->status);
     }
 
-    public function test_assignee_can_mark_their_task_print_complete(): void
+    public function test_assignee_can_complete_a_reviewed_task(): void
     {
         $staff = User::factory()->create();
         $staff->assignRole('staff');
 
-        $task = Task::factory()->sendForPrint()->assignedTo($staff)->create();
+        $task = Task::factory()->underReview()->assignedTo($staff)->create();
 
         $this->actingAs($staff)
             ->patch(route('tasks.status.update', $task), [
-                'status' => TaskStatus::PrintComplete->value,
+                'status' => TaskStatus::Completed->value,
             ])
             ->assertRedirect();
 
-        $this->assertSame(TaskStatus::PrintComplete, $task->refresh()->status);
+        $this->assertSame(TaskStatus::Completed, $task->refresh()->status);
+    }
+
+    public function test_assignee_can_cancel_their_own_task(): void
+    {
+        $staff = User::factory()->create();
+        $staff->assignRole('staff');
+
+        $task = Task::factory()->inProgress()->assignedTo($staff)->create();
+
+        $this->actingAs($staff)
+            ->patch(route('tasks.status.update', $task), [
+                'status' => TaskStatus::Cancelled->value,
+            ])
+            ->assertRedirect()
+            ->assertSessionHas('success');
+
+        $this->assertSame(TaskStatus::Cancelled, $task->refresh()->status);
     }
 
     public function test_non_assignee_staff_cannot_transition_a_task(): void
@@ -220,15 +237,15 @@ class TaskTest extends TestCase
         $otherStaff->assignRole('staff');
 
         $owner = User::factory()->create();
-        $task = Task::factory()->submittedForDesign()->assignedTo($owner)->create();
+        $task = Task::factory()->pending()->assignedTo($owner)->create();
 
         $this->actingAs($otherStaff)
             ->patch(route('tasks.status.update', $task), [
-                'status' => TaskStatus::SendForApprove->value,
+                'status' => TaskStatus::InProgress->value,
             ])
             ->assertForbidden();
 
-        $this->assertSame(TaskStatus::SubmitForDesign, $task->refresh()->status);
+        $this->assertSame(TaskStatus::Pending, $task->refresh()->status);
     }
 
     public function test_admin_can_transition_any_task(): void
@@ -236,15 +253,15 @@ class TaskTest extends TestCase
         $admin = User::factory()->create();
         $admin->assignRole('admin');
 
-        $task = Task::factory()->submittedForDesign()->create();
+        $task = Task::factory()->pending()->create();
 
         $this->actingAs($admin)
             ->patch(route('tasks.status.update', $task), [
-                'status' => TaskStatus::SendForApprove->value,
+                'status' => TaskStatus::InProgress->value,
             ])
             ->assertRedirect();
 
-        $this->assertSame(TaskStatus::SendForApprove, $task->refresh()->status);
+        $this->assertSame(TaskStatus::InProgress, $task->refresh()->status);
     }
 
     public function test_status_transition_survives_a_broadcast_failure(): void
@@ -257,29 +274,29 @@ class TaskTest extends TestCase
         $admin = User::factory()->create();
         $admin->assignRole('admin');
 
-        $task = Task::factory()->submittedForDesign()->create();
+        $task = Task::factory()->pending()->create();
 
         $this->actingAs($admin)
             ->patch(route('tasks.status.update', $task), [
-                'status' => TaskStatus::SendForApprove->value,
+                'status' => TaskStatus::InProgress->value,
             ])
             ->assertRedirect()
             ->assertSessionHas('success');
 
-        $this->assertSame(TaskStatus::SendForApprove, $task->refresh()->status);
+        $this->assertSame(TaskStatus::InProgress, $task->refresh()->status);
     }
 
-    public function test_print_complete_tasks_cannot_be_updated(): void
+    public function test_completed_tasks_cannot_be_updated(): void
     {
         $admin = User::factory()->create();
         $admin->assignRole('admin');
 
-        $task = Task::factory()->printCompleted()->create();
+        $task = Task::factory()->completed()->create();
 
         $this->actingAs($admin)
             ->patch(route('tasks.update', $task), [
                 'title' => 'Should not apply',
-                'status' => TaskStatus::PrintComplete->value,
+                'status' => TaskStatus::Completed->value,
                 'priority' => 'medium',
             ])
             ->assertForbidden();
@@ -287,12 +304,12 @@ class TaskTest extends TestCase
         $this->assertNotSame('Should not apply', $task->refresh()->title);
     }
 
-    public function test_print_complete_tasks_cannot_be_deleted(): void
+    public function test_completed_tasks_cannot_be_deleted(): void
     {
         $admin = User::factory()->create();
         $admin->assignRole('admin');
 
-        $task = Task::factory()->printCompleted()->create();
+        $task = Task::factory()->completed()->create();
 
         $this->actingAs($admin)
             ->delete(route('tasks.destroy', $task))
@@ -306,33 +323,49 @@ class TaskTest extends TestCase
         $admin = User::factory()->create();
         $admin->assignRole('admin');
 
-        $task = Task::factory()->submittedForDesign()->create();
+        $task = Task::factory()->pending()->create();
 
         $this->actingAs($admin)
             ->from('/tasks')
             ->patch(route('tasks.status.update', $task), [
-                'status' => TaskStatus::PrintComplete->value,
+                'status' => TaskStatus::Completed->value,
             ])
             ->assertRedirect()
             ->assertSessionHas('error');
 
-        $this->assertSame(TaskStatus::SubmitForDesign, $task->refresh()->status);
+        $this->assertSame(TaskStatus::Pending, $task->refresh()->status);
     }
 
-    public function test_print_complete_tasks_cannot_be_transitioned(): void
+    public function test_completed_tasks_cannot_be_transitioned(): void
     {
         $admin = User::factory()->create();
         $admin->assignRole('admin');
 
-        $task = Task::factory()->printCompleted()->create();
+        $task = Task::factory()->completed()->create();
 
         $this->actingAs($admin)
             ->patch(route('tasks.status.update', $task), [
-                'status' => TaskStatus::SendForPrint->value,
+                'status' => TaskStatus::UnderReview->value,
             ])
             ->assertForbidden();
 
-        $this->assertSame(TaskStatus::PrintComplete, $task->refresh()->status);
+        $this->assertSame(TaskStatus::Completed, $task->refresh()->status);
+    }
+
+    public function test_cancelled_tasks_cannot_be_transitioned(): void
+    {
+        $admin = User::factory()->create();
+        $admin->assignRole('admin');
+
+        $task = Task::factory()->cancelled()->create();
+
+        $this->actingAs($admin)
+            ->patch(route('tasks.status.update', $task), [
+                'status' => TaskStatus::InProgress->value,
+            ])
+            ->assertForbidden();
+
+        $this->assertSame(TaskStatus::Cancelled, $task->refresh()->status);
     }
 
     public function test_tasks_can_be_filtered_by_status(): void
@@ -340,11 +373,11 @@ class TaskTest extends TestCase
         $staff = User::factory()->create();
         $staff->assignRole('staff');
 
-        Task::factory()->submittedForDesign()->create();
-        Task::factory()->printCompleted()->create();
+        Task::factory()->pending()->create();
+        Task::factory()->completed()->create();
 
         $this->actingAs($staff)
-            ->get('/tasks?status=print_complete')
+            ->get('/tasks?status=completed')
             ->assertOk();
     }
 }

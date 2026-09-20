@@ -4,7 +4,21 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <title inertia>{{ config('app.name', 'Flexmania') }}</title>
+        <title inertia>{{ config('app.name', 'TaskManager') }}</title>
+
+        <!-- Theme -->
+        <script>
+            (function () {
+                const stored = localStorage.getItem('theme');
+                const prefersDark = window.matchMedia(
+                    '(prefers-color-scheme: dark)',
+                ).matches;
+                document.documentElement.classList.toggle(
+                    'dark',
+                    stored === 'dark' || (!stored && prefersDark),
+                );
+            })();
+        </script>
 
         <!-- Scripts -->
         @routes

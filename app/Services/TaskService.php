@@ -31,7 +31,11 @@ class TaskService extends AbstractService
     public function queryTasks(array $filters = []): Builder
     {
         return Task::query()
-            ->with(['assignee:id,name', 'customer:id,name', 'creator:id,name'])
+            ->with([
+                'assignee:id,name',
+                'customer',
+                'creator:id,name',
+            ])
             ->when($filters['search'] ?? null, function ($query, string $search) {
                 $query->where('title', 'like', "%{$search}%");
             })
@@ -83,8 +87,8 @@ class TaskService extends AbstractService
     }
 
     /**
-     * Move a task forward in the workflow
-     * (submit_for_design → send_for_approve → approved → send_for_print → print_complete).
+     * Move a task forward in the workflow or cancel it
+     * (pending → in_progress → under_review → completed, or cancel at any point).
      */
     public function transitionStatus(Task $task, TaskStatus $status): Task
     {
@@ -92,7 +96,7 @@ class TaskService extends AbstractService
             return $task;
         }
 
-        if ($task->status->next() !== $status) {
+        if (! $task->status->canTransitionTo($status)) {
             throw new \InvalidArgumentException(sprintf(
                 'Cannot move task from "%s" to "%s".',
                 $task->status->label(),

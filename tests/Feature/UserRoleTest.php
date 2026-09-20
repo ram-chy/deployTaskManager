@@ -69,7 +69,7 @@ class UserRoleTest extends TestCase
         $this->actingAs($admin)
             ->post(route('users.store'), [
                 'name' => 'New Staff Member',
-                'email' => 'new@flexmania.local',
+                'email' => 'new@taskmanager.local',
                 'password' => 'password123',
                 'password_confirmation' => 'password123',
                 'role_id' => Role::where('slug', 'staff')->value('id'),
@@ -77,7 +77,7 @@ class UserRoleTest extends TestCase
             ->assertRedirect()
             ->assertSessionHas('success');
 
-        $user = User::where('email', 'new@flexmania.local')->firstOrFail();
+        $user = User::where('email', 'new@taskmanager.local')->firstOrFail();
 
         $this->assertNotSame('password123', $user->password);
         $this->assertTrue($user->isStaff());
@@ -91,14 +91,14 @@ class UserRoleTest extends TestCase
         $this->actingAs($manager)
             ->post(route('users.store'), [
                 'name' => 'Hacker',
-                'email' => 'hacker@flexmania.local',
+                'email' => 'hacker@taskmanager.local',
                 'password' => 'password123',
                 'password_confirmation' => 'password123',
                 'role_id' => Role::where('slug', 'staff')->value('id'),
             ])
             ->assertForbidden();
 
-        $this->assertDatabaseMissing('users', ['email' => 'hacker@flexmania.local']);
+        $this->assertDatabaseMissing('users', ['email' => 'hacker@taskmanager.local']);
     }
 
     public function test_user_creation_validates_input(): void
@@ -130,7 +130,7 @@ class UserRoleTest extends TestCase
         $this->actingAs($admin)
             ->patch(route('users.update', $target), [
                 'name' => 'Updated Name',
-                'email' => 'updated@flexmania.local',
+                'email' => 'updated@taskmanager.local',
                 'password' => 'newpassword123',
                 'password_confirmation' => 'newpassword123',
                 'role_id' => Role::where('slug', 'manager')->value('id'),
@@ -141,7 +141,7 @@ class UserRoleTest extends TestCase
         $target->refresh();
 
         $this->assertSame('Updated Name', $target->name);
-        $this->assertSame('updated@flexmania.local', $target->email);
+        $this->assertSame('updated@taskmanager.local', $target->email);
         $this->assertNotSame('newpassword123', $target->password);
         $this->assertTrue($target->isManager());
     }
@@ -181,7 +181,7 @@ class UserRoleTest extends TestCase
         $this->actingAs($manager)
             ->patch(route('users.update', $target), [
                 'name' => 'Hacker',
-                'email' => 'hacker@flexmania.local',
+                'email' => 'hacker@taskmanager.local',
                 'password' => '',
                 'password_confirmation' => '',
                 'role_id' => Role::where('slug', 'staff')->value('id'),

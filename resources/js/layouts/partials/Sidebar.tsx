@@ -124,16 +124,16 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
 
             <aside
                 className={cn(
-                    'fixed inset-y-0 left-0 z-40 flex w-64 transform flex-col border-r border-gray-200 bg-white transition-transform duration-200 lg:static lg:translate-x-0',
+                    'fixed inset-y-0 left-0 z-40 flex w-64 transform flex-col border-r border-gray-200 bg-white transition-transform duration-200 dark:border-gray-800 dark:bg-gray-900 lg:static lg:translate-x-0',
                     open ? 'translate-x-0' : '-translate-x-full',
                 )}
             >
-                <div className="flex h-16 items-center gap-2 border-b border-gray-200 px-5">
+                <div className="flex h-16 items-center gap-2 border-b border-gray-200 px-5 dark:border-gray-800">
                     <Brand className="flex items-center gap-2" />
                 </div>
 
                 <nav className="flex-1 space-y-1 overflow-y-auto p-4">
-                    <p className="px-3 pb-2 text-xs font-semibold uppercase tracking-wider text-gray-400">
+                    <p className="px-3 pb-2 text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">
                         Main Menu
                     </p>
 
@@ -145,8 +145,8 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
                             className={cn(
                                 'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition',
                                 item.active()
-                                    ? 'bg-primary-50 text-primary-700'
-                                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900',
+                                    ? 'bg-primary-50 text-primary-700 dark:bg-primary-500/10 dark:text-primary-300'
+                                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-100',
                             )}
                         >
                             {item.icon}
@@ -155,7 +155,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
                     ))}
                 </nav>
 
-                <div className="border-t border-gray-200 p-4 text-xs text-gray-400">
+                <div className="border-t border-gray-200 p-4 text-xs text-gray-400 dark:border-gray-800 dark:text-gray-500">
                     v0.2.0 &middot; Roles &amp; Permissions
                 </div>
             </aside>

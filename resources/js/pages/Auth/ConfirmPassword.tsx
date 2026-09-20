@@ -22,10 +22,10 @@ export default function ConfirmPassword() {
             <Head title="Confirm Password" />
 
             <div className="mb-6">
-                <h2 className="text-xl font-semibold text-gray-900">
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
                     Confirm your password
                 </h2>
-                <p className="mt-1 text-sm text-gray-500">
+                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
                     This is a secure area of the application. Please confirm
                     your password before continuing.
                 </p>

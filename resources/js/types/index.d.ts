@@ -16,17 +16,23 @@ export interface Customer {
 }
 
 export type TaskStatus =
-    | 'submit_for_design'
-    | 'send_for_approve'
-    | 'approved'
-    | 'send_for_print'
-    | 'print_complete';
+    | 'pending'
+    | 'in_progress'
+    | 'under_review'
+    | 'completed'
+    | 'cancelled';
 
 export type TaskPriority = 'low' | 'medium' | 'high';
 
 export interface TaskReference {
     id: number;
     name: string;
+}
+
+export interface TaskCustomer extends TaskReference {
+    email: string | null;
+    phone: string | null;
+    notes: string | null;
 }
 
 export interface Task {
@@ -40,7 +46,7 @@ export interface Task {
     assignee_id: number | null;
     assignee: TaskReference | null;
     customer_id: number | null;
-    customer: TaskReference | null;
+    customer: TaskCustomer | null;
     creator: TaskReference | null;
     created_at: string;
     updated_at: string;
@@ -50,11 +56,11 @@ export interface Task {
 }
 
 export interface DashboardStats {
-    submit_for_design: number;
-    send_for_approve: number;
-    approved: number;
-    send_for_print: number;
-    print_complete: number;
+    pending: number;
+    in_progress: number;
+    under_review: number;
+    completed: number;
+    cancelled: number;
     today: number;
 }
 

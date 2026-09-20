@@ -67,7 +67,7 @@ export default function Modal({
                         >
                             <DialogPanel
                                 className={cn(
-                                    'w-full transform overflow-hidden rounded-xl bg-white p-6 text-left shadow-xl transition-all',
+                                    'w-full transform overflow-hidden rounded-xl bg-white p-6 text-left shadow-xl transition-all dark:bg-gray-900 dark:ring-1 dark:ring-gray-800',
                                     sizeClasses[size],
                                 )}
                             >
@@ -76,13 +76,13 @@ export default function Modal({
                                         {title && (
                                             <DialogTitle
                                                 as="h3"
-                                                className="text-base font-semibold text-gray-900"
+                                                className="text-base font-semibold text-gray-900 dark:text-gray-100"
                                             >
                                                 {title}
                                             </DialogTitle>
                                         )}
                                         {description && (
-                                            <p className="mt-1 text-sm text-gray-500">
+                                            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
                                                 {description}
                                             </p>
                                         )}

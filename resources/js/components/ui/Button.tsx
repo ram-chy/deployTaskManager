@@ -21,13 +21,13 @@ const variantClasses: Record<ButtonVariant, string> = {
     primary:
         'bg-primary-600 text-white shadow-sm hover:bg-primary-700 focus-visible:outline-primary-600 active:bg-primary-800',
     secondary:
-        'bg-white text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus-visible:outline-gray-400 active:bg-gray-100',
+        'bg-white text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus-visible:outline-gray-400 active:bg-gray-100 dark:bg-gray-800 dark:text-gray-100 dark:ring-gray-600 dark:hover:bg-gray-700 dark:active:bg-gray-700',
     danger:
         'bg-red-600 text-white shadow-sm hover:bg-red-700 focus-visible:outline-red-600 active:bg-red-800',
     outline:
-        'border border-primary-600 text-primary-600 hover:bg-primary-50 focus-visible:outline-primary-600 active:bg-primary-100',
+        'border border-primary-600 text-primary-600 hover:bg-primary-50 focus-visible:outline-primary-600 active:bg-primary-100 dark:border-primary-500 dark:text-primary-400 dark:hover:bg-primary-500/10 dark:active:bg-primary-500/20',
     ghost:
-        'text-gray-600 hover:bg-gray-100 hover:text-gray-900 focus-visible:outline-gray-400 active:bg-gray-200',
+        'text-gray-600 hover:bg-gray-100 hover:text-gray-900 focus-visible:outline-gray-400 active:bg-gray-200 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-100 dark:active:bg-gray-700',
 };
 
 const sizeClasses: Record<ButtonSize, string> = {

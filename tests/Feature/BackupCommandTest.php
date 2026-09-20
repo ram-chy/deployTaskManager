@@ -15,7 +15,7 @@ class BackupCommandTest extends TestCase
     {
         parent::setUp();
 
-        $this->backupDirectory = sys_get_temp_dir().'/flexmania-backup-test-'.uniqid();
+        $this->backupDirectory = sys_get_temp_dir().'/taskmanager-backup-test-'.uniqid();
         mkdir($this->backupDirectory, 0777, true);
 
         config(['database.backup.path' => $this->backupDirectory]);
@@ -67,7 +67,7 @@ class BackupCommandTest extends TestCase
                 'driver' => 'mysql',
                 'host' => '127.0.0.1',
                 'port' => '3306',
-                'database' => 'flexmania',
+                'database' => 'taskmanager',
                 'username' => 'root',
                 'password' => '',
             ],

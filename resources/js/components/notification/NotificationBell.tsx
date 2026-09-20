@@ -29,7 +29,7 @@ export default function NotificationBell() {
             <button
                 type="button"
                 onClick={() => setOpen((value) => !value)}
-                className="relative rounded-lg p-2 text-gray-500 transition hover:bg-gray-100 hover:text-gray-700"
+                className="relative rounded-lg p-2 text-gray-500 transition hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-200"
                 aria-label="Notifications"
             >
                 <svg
@@ -53,16 +53,16 @@ export default function NotificationBell() {
             </button>
 
             {open && (
-                <div className="absolute right-0 z-30 mt-2 w-80 overflow-hidden rounded-lg border border-gray-200 bg-white shadow-lg">
-                    <div className="flex items-center justify-between border-b border-gray-100 px-4 py-2.5">
-                        <p className="text-sm font-semibold text-gray-900">
+                <div className="absolute right-0 z-30 mt-2 w-80 overflow-hidden rounded-lg border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800 dark:shadow-black/30">
+                    <div className="flex items-center justify-between border-b border-gray-100 px-4 py-2.5 dark:border-gray-700">
+                        <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
                             Notifications
                         </p>
                         {unreadCount > 0 && (
                             <button
                                 type="button"
                                 onClick={() => void markAllRead()}
-                                className="text-xs font-medium text-primary-600 transition hover:text-primary-700"
+                                className="text-xs font-medium text-primary-600 transition hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300"
                             >
                                 Mark all read
                             </button>
@@ -70,11 +70,11 @@ export default function NotificationBell() {
                     </div>
 
                     {items.length === 0 ? (
-                        <div className="px-4 py-10 text-center text-sm text-gray-500">
+                        <div className="px-4 py-10 text-center text-sm text-gray-500 dark:text-gray-400">
                             You&rsquo;re all caught up.
                         </div>
                     ) : (
-                        <ul className="max-h-96 divide-y divide-gray-100 overflow-y-auto">
+                        <ul className="max-h-96 divide-y divide-gray-100 overflow-y-auto dark:divide-gray-700">
                             {items.map((item) =>
                                 item.task_id ? (
                                     <li key={item.id}>
@@ -82,15 +82,15 @@ export default function NotificationBell() {
                                             href={route('tasks.index')}
                                             onClick={() => setOpen(false)}
                                             className={cn(
-                                                'block px-4 py-3 transition hover:bg-gray-50',
+                                                'block px-4 py-3 transition hover:bg-gray-50 dark:hover:bg-gray-700/60',
                                                 !item.read_at &&
-                                                    'bg-primary-50/50',
+                                                    'bg-primary-50/50 dark:bg-primary-500/10',
                                             )}
                                         >
-                                            <p className="text-sm font-medium text-gray-900">
+                                            <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
                                                 {item.message}
                                             </p>
-                                            <p className="mt-0.5 text-xs text-gray-500">
+                                            <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
                                                 {item.created_at}
                                             </p>
                                         </Link>
@@ -100,13 +100,14 @@ export default function NotificationBell() {
                                         key={item.id}
                                         className={cn(
                                             'px-4 py-3',
-                                            !item.read_at && 'bg-primary-50/50',
+                                            !item.read_at &&
+                                                'bg-primary-50/50 dark:bg-primary-500/10',
                                         )}
                                     >
-                                        <p className="text-sm font-medium text-gray-900">
+                                        <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
                                             {item.message}
                                         </p>
-                                        <p className="mt-0.5 text-xs text-gray-500">
+                                        <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
                                             {item.created_at}
                                         </p>
                                     </li>

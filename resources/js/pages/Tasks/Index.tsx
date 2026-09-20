@@ -56,7 +56,7 @@ interface TaskFormValues {
 const emptyForm: TaskFormValues = {
     title: '',
     description: '',
-    status: 'submit_for_design',
+    status: 'pending',
     priority: 'medium',
     due_date: '',
     assignee_id: '',
@@ -64,19 +64,19 @@ const emptyForm: TaskFormValues = {
 };
 
 const statusLabel: Record<TaskStatus, string> = {
-    submit_for_design: 'Submit For Design',
-    send_for_approve: 'Send for Approve',
-    approved: 'Approved',
-    send_for_print: 'Send for Print',
-    print_complete: 'Print Complete',
+    pending: 'Pending',
+    in_progress: 'In Progress',
+    under_review: 'Under Review',
+    completed: 'Completed',
+    cancelled: 'Cancelled',
 };
 
 const statusOptions: Array<{ value: TaskStatus; label: string }> = [
-    { value: 'submit_for_design', label: 'Submit For Design' },
-    { value: 'send_for_approve', label: 'Send for Approve' },
-    { value: 'approved', label: 'Approved' },
-    { value: 'send_for_print', label: 'Send for Print' },
-    { value: 'print_complete', label: 'Print Complete' },
+    { value: 'pending', label: 'Pending' },
+    { value: 'in_progress', label: 'In Progress' },
+    { value: 'under_review', label: 'Under Review' },
+    { value: 'completed', label: 'Completed' },
+    { value: 'cancelled', label: 'Cancelled' },
 ];
 
 const priorityOptions: Array<{ value: TaskPriority; label: string }> = [
@@ -86,24 +86,29 @@ const priorityOptions: Array<{ value: TaskPriority; label: string }> = [
 ];
 
 const statusVariant: Record<TaskStatus, BadgeVariant> = {
-    submit_for_design: 'warning',
-    send_for_approve: 'info',
-    approved: 'success',
-    send_for_print: 'primary',
-    print_complete: 'neutral',
+    pending: 'warning',
+    in_progress: 'info',
+    under_review: 'primary',
+    completed: 'success',
+    cancelled: 'neutral',
 };
 
-const nextTransition: Partial<
+const forwardTransition: Partial<
     Record<TaskStatus, { status: TaskStatus; label: string }>
 > = {
-    submit_for_design: {
-        status: 'send_for_approve',
-        label: 'Send for Approve',
+    pending: {
+        status: 'in_progress',
+        label: 'Start Task',
     },
-    send_for_approve: { status: 'approved', label: 'Approve' },
-    approved: { status: 'send_for_print', label: 'Send for Print' },
-    send_for_print: { status: 'print_complete', label: 'Print Complete' },
+    in_progress: { status: 'under_review', label: 'Send for Review' },
+    under_review: { status: 'completed', label: 'Mark Complete' },
 };
+
+const cancellableStatuses: TaskStatus[] = [
+    'pending',
+    'in_progress',
+    'under_review',
+];
 
 const priorityVariant: Record<TaskPriority, BadgeVariant> = {
     low: 'neutral',
@@ -115,7 +120,7 @@ const cleanLabel = (label: string): string =>
     label.replace('&laquo;', '\u00ab').replace('&raquo;', '\u00bb').trim();
 
 const selectClasses =
-    'block w-full rounded-md border-0 bg-white px-2.5 py-2 text-sm text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-primary-600';
+    'block w-full rounded-md border-0 bg-white px-2.5 py-2 text-sm text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-primary-600 dark:bg-gray-800 dark:text-gray-100 dark:ring-gray-600 dark:focus:ring-primary-500';
 
 interface TaskFormModalProps {
     open: boolean;
@@ -213,7 +218,7 @@ function TaskFormModal({
                 <div className="space-y-1.5">
                     <label
                         htmlFor="task-description"
-                        className="block text-sm font-medium text-gray-700"
+                        className="block text-sm font-medium text-gray-700 dark:text-gray-300"
                     >
                         Description
                     </label>
@@ -224,10 +229,10 @@ function TaskFormModal({
                         onChange={(event) =>
                             setData('description', event.target.value)
                         }
-                        className="block w-full rounded-md border-0 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary-600"
+                        className="block w-full rounded-md border-0 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary-600 dark:bg-gray-800 dark:text-gray-100 dark:ring-gray-600 dark:placeholder:text-gray-500 dark:focus:ring-primary-500"
                     />
                     {errors.description && (
-                        <p className="text-xs text-red-600">
+                        <p className="text-xs text-red-600 dark:text-red-400">
                             {errors.description}
                         </p>
                     )}
@@ -237,7 +242,7 @@ function TaskFormModal({
                     <div className="space-y-1.5">
                         <label
                             htmlFor="task-status"
-                            className="block text-sm font-medium text-gray-700"
+                            className="block text-sm font-medium text-gray-700 dark:text-gray-300"
                         >
                             Status
                         </label>
@@ -263,7 +268,7 @@ function TaskFormModal({
                     <div className="space-y-1.5">
                         <label
                             htmlFor="task-priority"
-                            className="block text-sm font-medium text-gray-700"
+                            className="block text-sm font-medium text-gray-700 dark:text-gray-300"
                         >
                             Priority
                         </label>
@@ -289,7 +294,7 @@ function TaskFormModal({
                     <div className="space-y-1.5">
                         <label
                             htmlFor="task-due-date"
-                            className="block text-sm font-medium text-gray-700"
+                            className="block text-sm font-medium text-gray-700 dark:text-gray-300"
                         >
                             Due Date
                         </label>
@@ -303,7 +308,7 @@ function TaskFormModal({
                             className={selectClasses}
                         />
                         {errors.due_date && (
-                            <p className="text-xs text-red-600">
+                            <p className="text-xs text-red-600 dark:text-red-400">
                                 {errors.due_date}
                             </p>
                         )}
@@ -314,7 +319,7 @@ function TaskFormModal({
                     <div className="space-y-1.5">
                         <label
                             htmlFor="task-assignee"
-                            className="block text-sm font-medium text-gray-700"
+                            className="block text-sm font-medium text-gray-700 dark:text-gray-300"
                         >
                             Assignee
                         </label>
@@ -339,7 +344,7 @@ function TaskFormModal({
                             ))}
                         </select>
                         {errors.assignee_id && (
-                            <p className="text-xs text-red-600">
+                            <p className="text-xs text-red-600 dark:text-red-400">
                                 {errors.assignee_id}
                             </p>
                         )}
@@ -348,7 +353,7 @@ function TaskFormModal({
                     <div className="space-y-1.5">
                         <label
                             htmlFor="task-customer"
-                            className="block text-sm font-medium text-gray-700"
+                            className="block text-sm font-medium text-gray-700 dark:text-gray-300"
                         >
                             Customer
                         </label>
@@ -373,7 +378,7 @@ function TaskFormModal({
                             ))}
                         </select>
                         {errors.customer_id && (
-                            <p className="text-xs text-red-600">
+                            <p className="text-xs text-red-600 dark:text-red-400">
                                 {errors.customer_id}
                             </p>
                         )}
@@ -435,6 +440,175 @@ function DeleteTaskModal({ task, onClose }: DeleteTaskModalProps) {
     );
 }
 
+interface ViewTaskModalProps {
+    task: Task | null;
+    onClose: () => void;
+}
+
+function ViewTaskModal({ task, onClose }: ViewTaskModalProps) {
+    return (
+        <Modal
+            open={task !== null}
+            onClose={onClose}
+            title={task?.title}
+            description={
+                task?.description ?? (
+                    <span className="text-gray-400 dark:text-gray-500">
+                        No description.
+                    </span>
+                )
+            }
+            size="lg"
+            footer={
+                <Button variant="secondary" onClick={onClose}>
+                    Close
+                </Button>
+            }
+        >
+            {task && (
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div className="space-y-1.5">
+                        <p className="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                            Status
+                        </p>
+                        <Badge variant={statusVariant[task.status]}>
+                            {statusLabel[task.status]}
+                        </Badge>
+                    </div>
+
+                    <div className="space-y-1.5">
+                        <p className="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                            Priority
+                        </p>
+                        <Badge variant={priorityVariant[task.priority]}>
+                            {task.priority.charAt(0).toUpperCase() +
+                                task.priority.slice(1)}
+                        </Badge>
+                    </div>
+
+                    <div className="space-y-1.5">
+                        <p className="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                            Assignee
+                        </p>
+                        <p className="text-sm text-gray-900 dark:text-gray-100">
+                            {task.assignee?.name ?? (
+                                <span className="text-gray-400 dark:text-gray-500">
+                                    &mdash;
+                                </span>
+                            )}
+                        </p>
+                    </div>
+
+                    <div className="space-y-1.5">
+                        <p className="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                            Assigned By
+                        </p>
+                        <p className="text-sm text-gray-900 dark:text-gray-100">
+                            {task.creator?.name ?? (
+                                <span className="text-gray-400 dark:text-gray-500">
+                                    &mdash;
+                                </span>
+                            )}
+                        </p>
+                    </div>
+
+                    <div className="space-y-1.5">
+                        <p className="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                            Due Date
+                        </p>
+                        <p
+                            className={cn(
+                                'text-sm',
+                                task.is_overdue
+                                    ? 'font-medium text-red-600 dark:text-red-400'
+                                    : 'text-gray-900 dark:text-gray-100',
+                            )}
+                        >
+                            {task.due_date ?? (
+                                <span className="text-gray-400 dark:text-gray-500">
+                                    &mdash;
+                                </span>
+                            )}
+                        </p>
+                    </div>
+
+                    <div className="space-y-1.5">
+                        <p className="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                            Created At
+                        </p>
+                        <p className="text-sm text-gray-900 dark:text-gray-100">
+                            {task.created_at}
+                        </p>
+                    </div>
+
+                    <div className="space-y-1.5">
+                        <p className="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                            Updated At
+                        </p>
+                        <p className="text-sm text-gray-900 dark:text-gray-100">
+                            {task.updated_at}
+                        </p>
+                    </div>
+                </div>
+            )}
+
+            {task?.customer && (
+                <div className="mt-4 space-y-3 rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-gray-900">
+                    <p className="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                        Customer Details
+                    </p>
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                        <div className="space-y-1">
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                                Name
+                            </p>
+                            <p className="text-sm text-gray-900 dark:text-gray-100">
+                                {task.customer.name}
+                            </p>
+                        </div>
+                        <div className="space-y-1">
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                                Email
+                            </p>
+                            <p className="text-sm text-gray-900 dark:text-gray-100">
+                                {task.customer.email ?? (
+                                    <span className="text-gray-400 dark:text-gray-500">
+                                        &mdash;
+                                    </span>
+                                )}
+                            </p>
+                        </div>
+                        <div className="space-y-1">
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                                Phone
+                            </p>
+                            <p className="text-sm text-gray-900 dark:text-gray-100">
+                                {task.customer.phone ?? (
+                                    <span className="text-gray-400 dark:text-gray-500">
+                                        &mdash;
+                                    </span>
+                                )}
+                            </p>
+                        </div>
+                        <div className="space-y-1">
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                                Notes
+                            </p>
+                            <p className="text-sm text-gray-900 dark:text-gray-100">
+                                {task.customer.notes ?? (
+                                    <span className="text-gray-400 dark:text-gray-500">
+                                        &mdash;
+                                    </span>
+                                )}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </Modal>
+    );
+}
+
 export default function TasksIndex({
     tasks,
     filters,
@@ -451,6 +625,7 @@ export default function TasksIndex({
     );
     const [formOpen, setFormOpen] = useState(false);
     const [editingTask, setEditingTask] = useState<Task | null>(null);
+    const [viewingTask, setViewingTask] = useState<Task | null>(null);
     const [deletingTask, setDeletingTask] = useState<Task | null>(null);
     const [transitioningId, setTransitioningId] = useState<number | null>(null);
     const [exportFrom, setExportFrom] = useState('');
@@ -526,11 +701,11 @@ export default function TasksIndex({
                 header: 'Task',
                 cell: (task) => (
                     <div className="max-w-xs">
-                        <div className="font-medium text-gray-900">
+                        <div className="font-medium text-gray-900 dark:text-gray-100">
                             {task.title}
                         </div>
                         {task.description && (
-                            <div className="mt-0.5 line-clamp-1 text-xs text-gray-500">
+                            <div className="mt-0.5 line-clamp-1 text-xs text-gray-500 dark:text-gray-400">
                                 {task.description}
                             </div>
                         )}
@@ -560,9 +735,9 @@ export default function TasksIndex({
                 key: 'assignee',
                 header: 'Assigned To',
                 cell: (task) => (
-                    <span className="text-gray-600">
+                    <span className="text-gray-600 dark:text-gray-400">
                         {task.assignee?.name ?? (
-                            <span className="text-gray-400">&mdash;</span>
+                            <span className="text-gray-400 dark:text-gray-500">&mdash;</span>
                         )}
                     </span>
                 ),
@@ -571,9 +746,9 @@ export default function TasksIndex({
                 key: 'creator',
                 header: 'Assigned By',
                 cell: (task) => (
-                    <span className="text-gray-600">
+                    <span className="text-gray-600 dark:text-gray-400">
                         {task.creator?.name ?? (
-                            <span className="text-gray-400">&mdash;</span>
+                            <span className="text-gray-400 dark:text-gray-500">&mdash;</span>
                         )}
                     </span>
                 ),
@@ -582,9 +757,9 @@ export default function TasksIndex({
                 key: 'customer',
                 header: 'Customer',
                 cell: (task) => (
-                    <span className="text-gray-600">
+                    <span className="text-gray-600 dark:text-gray-400">
                         {task.customer?.name ?? (
-                            <span className="text-gray-400">&mdash;</span>
+                            <span className="text-gray-400 dark:text-gray-500">&mdash;</span>
                         )}
                     </span>
                 ),
@@ -596,12 +771,13 @@ export default function TasksIndex({
                     <div className="flex items-center gap-1.5">
                         <span
                             className={cn(
-                                'text-gray-600',
-                                task.is_overdue && 'font-medium text-red-600',
+                                'text-gray-600 dark:text-gray-400',
+                                task.is_overdue &&
+                                    'font-medium text-red-600 dark:text-red-400',
                             )}
                         >
                             {task.due_date ?? (
-                                <span className="text-gray-400">&mdash;</span>
+                                <span className="text-gray-400 dark:text-gray-500">&mdash;</span>
                             )}
                         </span>
                         {task.is_overdue && (
@@ -616,7 +792,8 @@ export default function TasksIndex({
                 className: 'text-right',
                 headerClassName: 'text-right',
                 cell: (task) => {
-                    const next = nextTransition[task.status];
+                    const next = forwardTransition[task.status];
+                    const canCancel = cancellableStatuses.includes(task.status);
 
                     return (
                         <div className="flex items-center justify-end gap-1.5">
@@ -630,6 +807,24 @@ export default function TasksIndex({
                                     {next.label}
                                 </Button>
                             )}
+                            {canCancel && task.can_transition && (
+                                <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    className="text-red-600 hover:bg-red-50 hover:text-red-700 dark:text-red-400 dark:hover:bg-red-500/10 dark:hover:text-red-300"
+                                    loading={transitioningId === task.id}
+                                    onClick={() => transition(task, 'cancelled')}
+                                >
+                                    Cancel
+                                </Button>
+                            )}
+                        <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => setViewingTask(task)}
+                        >
+                            View
+                        </Button>
                         {task.can_edit && (
                             <Button
                                 size="sm"
@@ -643,7 +838,7 @@ export default function TasksIndex({
                             <Button
                                 size="sm"
                                 variant="ghost"
-                                className="text-red-600 hover:bg-red-50 hover:text-red-700"
+                                className="text-red-600 hover:bg-red-50 hover:text-red-700 dark:text-red-400 dark:hover:bg-red-500/10 dark:hover:text-red-300"
                                 onClick={() => setDeletingTask(task)}
                             >
                                 Delete
@@ -688,8 +883,8 @@ export default function TasksIndex({
         return params;
     }, [searchInput, statusFilter, priorityFilter, exportFrom, exportTo]);
 
-    const exportLinkClasses =
-        'inline-flex items-center justify-center rounded-md border border-primary-600 px-3.5 py-2 text-sm font-semibold text-primary-600 transition hover:bg-primary-50';
+const exportLinkClasses =
+    'inline-flex items-center justify-center rounded-md border border-primary-600 px-3.5 py-2 text-sm font-semibold text-primary-600 transition hover:bg-primary-50 dark:border-primary-500 dark:text-primary-400 dark:hover:bg-primary-500/10';
 
     return (
         <AppLayout title="Tasks">
@@ -698,10 +893,10 @@ export default function TasksIndex({
             <div className="space-y-6">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                     <div>
-                        <h2 className="text-2xl font-semibold text-gray-900">
+                        <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
                             Tasks
                         </h2>
-                        <p className="mt-1 text-sm text-gray-500">
+                        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
                             Track and manage the team's work.
                         </p>
                     </div>
@@ -710,7 +905,7 @@ export default function TasksIndex({
                         <div className="flex items-center gap-1.5">
                             <label
                                 htmlFor="export-from"
-                                className="text-xs font-medium text-gray-600"
+                                className="text-xs font-medium text-gray-600 dark:text-gray-400"
                             >
                                 From
                             </label>
@@ -721,13 +916,13 @@ export default function TasksIndex({
                                 onChange={(event) =>
                                     setExportFrom(event.target.value)
                                 }
-                                className="rounded-md border-0 bg-white px-2 py-1.5 text-sm text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-primary-600"
+                                className="rounded-md border-0 bg-white px-2 py-1.5 text-sm text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-primary-600 dark:bg-gray-800 dark:text-gray-100 dark:ring-gray-600 dark:focus:ring-primary-500"
                             />
                         </div>
                         <div className="flex items-center gap-1.5">
                             <label
                                 htmlFor="export-to"
-                                className="text-xs font-medium text-gray-600"
+                                className="text-xs font-medium text-gray-600 dark:text-gray-400"
                             >
                                 To
                             </label>
@@ -738,7 +933,7 @@ export default function TasksIndex({
                                 onChange={(event) =>
                                     setExportTo(event.target.value)
                                 }
-                                className="rounded-md border-0 bg-white px-2 py-1.5 text-sm text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-primary-600"
+                                className="rounded-md border-0 bg-white px-2 py-1.5 text-sm text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-primary-600 dark:bg-gray-800 dark:text-gray-100 dark:ring-gray-600 dark:focus:ring-primary-500"
                             />
                         </div>
                         <a
@@ -761,7 +956,7 @@ export default function TasksIndex({
 
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
                     <div className="relative lg:col-span-2">
-                        <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                        <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400 dark:text-gray-500">
                             <svg
                                 className="h-4 w-4"
                                 viewBox="0 0 24 24"
@@ -781,7 +976,7 @@ export default function TasksIndex({
                                 setSearchInput(event.target.value)
                             }
                             placeholder="Search tasks..."
-                            className="block w-full rounded-md border-0 bg-white py-2 pl-10 pr-3 text-sm text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary-600"
+                            className="block w-full rounded-md border-0 bg-white py-2 pl-10 pr-3 text-sm text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary-600 dark:bg-gray-800 dark:text-gray-100 dark:ring-gray-600 dark:placeholder:text-gray-500 dark:focus:ring-primary-500"
                         />
                     </div>
 
@@ -831,7 +1026,7 @@ export default function TasksIndex({
                     rows={tasks.data}
                     rowKey={(task) => task.id}
                     emptyState={
-                        <span className="text-sm text-gray-500">
+                        <span className="text-sm text-gray-500 dark:text-gray-400">
                             No tasks found. Try adjusting the filters.
                         </span>
                     }
@@ -839,7 +1034,7 @@ export default function TasksIndex({
 
                 {tasks.meta.last_page > 1 && (
                     <nav className="flex flex-col items-center justify-between gap-3 sm:flex-row">
-                        <p className="text-sm text-gray-500">
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
                             Showing {start}&ndash;{end} of {tasks.meta.total}
                         </p>
 
@@ -854,7 +1049,7 @@ export default function TasksIndex({
                                             'rounded-md border px-3 py-1.5 text-sm font-medium transition',
                                             link.active
                                                 ? 'border-primary-600 bg-primary-600 text-white'
-                                                : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50',
+                                                : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700',
                                         )}
                                     >
                                         {cleanLabel(link.label)}
@@ -862,7 +1057,7 @@ export default function TasksIndex({
                                 ) : (
                                     <span
                                         key={index}
-                                        className="rounded-md border border-transparent px-3 py-1.5 text-sm text-gray-400"
+                                        className="rounded-md border border-transparent px-3 py-1.5 text-sm text-gray-400 dark:text-gray-600"
                                     >
                                         {cleanLabel(link.label)}
                                     </span>
@@ -885,6 +1080,11 @@ export default function TasksIndex({
             <DeleteTaskModal
                 task={deletingTask}
                 onClose={() => setDeletingTask(null)}
+            />
+
+            <ViewTaskModal
+                task={viewingTask}
+                onClose={() => setViewingTask(null)}
             />
         </AppLayout>
     );

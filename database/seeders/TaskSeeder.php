@@ -16,16 +16,16 @@ class TaskSeeder extends Seeder
      */
     public function run(): void
     {
-        $staff = User::where('email', 'staff@flexmania.local')->firstOrFail();
-        $manager = User::where('email', 'manager@flexmania.local')->firstOrFail();
-        $admin = User::where('email', 'admin@flexmania.local')->firstOrFail();
+        $staff = User::where('email', 'staff@taskmanager.local')->firstOrFail();
+        $manager = User::where('email', 'manager@taskmanager.local')->firstOrFail();
+        $admin = User::where('email', 'admin@taskmanager.local')->firstOrFail();
         $customers = Customer::orderBy('id')->get();
 
         $tasks = [
             [
                 'title' => 'Prepare quarterly client report',
                 'description' => 'Compile metrics and send the summary to Acme Corporation.',
-                'status' => TaskStatus::SendForApprove,
+                'status' => TaskStatus::InProgress,
                 'priority' => TaskPriority::High,
                 'due_date' => now()->addDays(2)->toDateString(),
                 'assignee_id' => $staff->id,
@@ -35,7 +35,7 @@ class TaskSeeder extends Seeder
             [
                 'title' => 'Update office contact list',
                 'description' => null,
-                'status' => TaskStatus::SubmitForDesign,
+                'status' => TaskStatus::Pending,
                 'priority' => TaskPriority::Low,
                 'due_date' => now()->addWeek()->toDateString(),
                 'assignee_id' => $staff->id,
@@ -45,7 +45,7 @@ class TaskSeeder extends Seeder
             [
                 'title' => 'Follow up on invoice #1042',
                 'description' => 'Customer reported they never received the invoice.',
-                'status' => TaskStatus::SubmitForDesign,
+                'status' => TaskStatus::Pending,
                 'priority' => TaskPriority::High,
                 'due_date' => today()->subDay()->toDateString(),
                 'assignee_id' => $manager->id,
@@ -55,7 +55,7 @@ class TaskSeeder extends Seeder
             [
                 'title' => 'Review onboarding checklist',
                 'description' => 'Walk through the new hire onboarding steps with the team.',
-                'status' => TaskStatus::PrintComplete,
+                'status' => TaskStatus::Completed,
                 'priority' => TaskPriority::Medium,
                 'due_date' => now()->subDays(3)->toDateString(),
                 'assignee_id' => $admin->id,
@@ -65,7 +65,7 @@ class TaskSeeder extends Seeder
             [
                 'title' => 'Draft service agreement renewal',
                 'description' => 'Prepare the renewal draft for Stark Industries.',
-                'status' => TaskStatus::SubmitForDesign,
+                'status' => TaskStatus::Pending,
                 'priority' => TaskPriority::Medium,
                 'due_date' => now()->addDays(6)->toDateString(),
                 'assignee_id' => $manager->id,
@@ -75,7 +75,7 @@ class TaskSeeder extends Seeder
             [
                 'title' => 'Clean up shared drive',
                 'description' => 'Archive files older than 12 months.',
-                'status' => TaskStatus::Approved,
+                'status' => TaskStatus::UnderReview,
                 'priority' => TaskPriority::Low,
                 'due_date' => now()->addDays(10)->toDateString(),
                 'assignee_id' => $staff->id,
@@ -85,7 +85,7 @@ class TaskSeeder extends Seeder
             [
                 'title' => 'Fix login bug on portal',
                 'description' => 'Users cannot reset passwords after the last deploy.',
-                'status' => TaskStatus::SendForPrint,
+                'status' => TaskStatus::UnderReview,
                 'priority' => TaskPriority::High,
                 'due_date' => today()->toDateString(),
                 'assignee_id' => $staff->id,
@@ -95,7 +95,7 @@ class TaskSeeder extends Seeder
             [
                 'title' => 'Schedule team training session',
                 'description' => null,
-                'status' => TaskStatus::PrintComplete,
+                'status' => TaskStatus::Completed,
                 'priority' => TaskPriority::Medium,
                 'due_date' => now()->subDay()->toDateString(),
                 'assignee_id' => $manager->id,

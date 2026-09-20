@@ -36,7 +36,7 @@ class TaskPolicy
      */
     public function update(User $user, Task $task): bool
     {
-        return ($user->isAdmin() || $user->isManager()) && ! $task->isCompleted();
+        return ($user->isAdmin() || $user->isManager()) && ! $task->isTerminal();
     }
 
     /**
@@ -52,7 +52,7 @@ class TaskPolicy
      */
     public function delete(User $user, Task $task): bool
     {
-        return $user->isAdmin() && ! $task->isCompleted();
+        return $user->isAdmin() && ! $task->isTerminal();
     }
 
     /**
@@ -60,7 +60,7 @@ class TaskPolicy
      */
     public function updateStatus(User $user, Task $task): bool
     {
-        return ! $task->isCompleted()
+        return ! $task->isTerminal()
             && ($user->isAdmin() || $user->isManager() || $task->assignee_id === $user->id);
     }
 }

@@ -28,7 +28,13 @@ class TaskResource extends JsonResource
                 : null),
             'customer_id' => $this->customer_id,
             'customer' => $this->whenLoaded('customer', fn () => $this->customer
-                ? ['id' => $this->customer->id, 'name' => $this->customer->name]
+                ? [
+                    'id' => $this->customer->id,
+                    'name' => $this->customer->name,
+                    'email' => $this->customer->email,
+                    'phone' => $this->customer->phone,
+                    'notes' => $this->customer->notes,
+                ]
                 : null),
             'creator' => $this->whenLoaded('creator', fn () => $this->creator
                 ? ['id' => $this->creator->id, 'name' => $this->creator->name]

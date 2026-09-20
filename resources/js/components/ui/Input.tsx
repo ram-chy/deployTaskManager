@@ -18,7 +18,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
                 {label && (
                     <label
                         htmlFor={inputId}
-                        className="block text-sm font-medium text-gray-700"
+                        className="block text-sm font-medium text-gray-700 dark:text-gray-300"
                     >
                         {label}
                     </label>
@@ -26,7 +26,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
 
                 <div className="relative">
                     {leadingIcon && (
-                        <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                        <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400 dark:text-gray-500">
                             {leadingIcon}
                         </span>
                     )}
@@ -35,10 +35,10 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
                         ref={ref}
                         id={inputId}
                         className={cn(
-                            'block w-full rounded-md border-0 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary-600 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-500',
+                            'block w-full rounded-md border-0 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary-600 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-500 dark:bg-gray-800 dark:text-gray-100 dark:ring-gray-600 dark:placeholder:text-gray-500 dark:disabled:bg-gray-900 dark:disabled:text-gray-500 dark:focus:ring-primary-500',
                             leadingIcon ? 'pl-10' : '',
                             error &&
-                                'ring-red-300 focus:ring-red-500',
+                                'ring-red-300 focus:ring-red-500 dark:ring-red-800 dark:focus:ring-red-500',
                             className,
                         )}
                         aria-invalid={error ? true : undefined}
@@ -56,14 +56,14 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
                 {error ? (
                     <p
                         id={`${inputId}-error`}
-                        className="text-xs text-red-600"
+                        className="text-xs text-red-600 dark:text-red-400"
                     >
                         {error}
                     </p>
                 ) : hint ? (
                     <p
                         id={`${inputId}-hint`}
-                        className="text-xs text-gray-500"
+                        className="text-xs text-gray-500 dark:text-gray-400"
                     >
                         {hint}
                     </p>

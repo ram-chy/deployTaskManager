@@ -1,58 +1,263 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# TaskManager — Office Task Management System
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+TaskManager is a modern, self-hosted office task management system built with
+Laravel, React, Inertia, and TypeScript. It is designed for a small office or
+home-network deployment and runs fully offline — no internet access required.
 
-## About Laravel
+It lets you manage customers, assign tasks, and track work through a
+general-purpose status workflow with real-time notifications, PDF/Excel export,
+and role-based access for Admin, Manager, and Staff users.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+---
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Features
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### User management
+- Role-based access control: **Admin**, **Manager**, **Staff**
+- User CRUD and role assignment (Admin only)
+- Registration is enabled out of the box, or you can disable it
 
-## Learning Laravel
+### Customer management
+- Maintain a customer directory
+- Full CRUD (Admin only) inside the authenticated app
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+### Task management
+- Create, assign, and track tasks per customer
+- View full task details (with customer info) in a modal
+- 5-status general-purpose workflow with status transition:
+  1. **Pending**
+  2. **In Progress**
+  3. **Under Review**
+  4. **Completed**
+  5. **Cancelled** (from any active stage)
+- Guarded forward-only status transitions via a dedicated service layer
+- Real-time task status updates over WebSockets
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### Dashboard & reporting
+- Dashboard cards: pending tasks, in-progress, completed, today's tasks, recent activity
+- Export the full task listing to **PDF** (landscape layout via DOMPDF)
+- Export to **Excel** (via Maatwebsite Excel)
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+### UI & theming
+- **Dark mode** with light/dark toggle (saved to localStorage, falls back to system preference)
+- Responsive sidebar layout (Tailwind CSS v4 + Headless UI)
 
-## Agentic Development
+### Realtime & notifications
+- Laravel **Reverb** WebSocket server + Laravel **Echo**
+- Realtime (broadcast) notifications when a task status changes
+- In-app notification center with read/unread state
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+### Operations
+- Automatic daily **database backup** command (`php artisan backup:database`)
+- Database-backed queues, cache, and sessions
+- Production-friendly `.env.example` (debug off)
+
+---
+
+## Technology Stack
+
+| Layer      | Technology                                            |
+| ---------- | ----------------------------------------------------- |
+| Backend    | Laravel 13, PHP 8.4+                                  |
+| Frontend   | React 19, Inertia 2, TypeScript, Vite                |
+| Styling    | Tailwind CSS v4, Headless UI                          |
+| Database   | MySQL (InnoDB, foreign keys)                          |
+| Auth       | Laravel session authentication + Sanctum             |
+| Realtime   | Laravel Reverb, Laravel Echo, Pusher JS              |
+| Queues     | Database queue driver                                |
+| Export     | barryvdh/laravel-dompdf (PDF), Maatwebsite Excel     |
+
+---
+
+## Requirements
+
+- PHP **8.4+** (with `pdo_mysql`, `mbstring`, `openssl`, `gd` extensions)
+- Composer 2
+- Node.js 20+ and npm
+- MySQL 8 (or compatible)
+- A running queue worker and Reverb server for realtime notifications
+
+---
+
+## Installation
+
+### 1. Clone or extract the project
 
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+cd path/to/taskmanager
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+### 2. Install backend dependencies
 
-## Contributing
+```bash
+composer install --no-dev --optimize-autoloader
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### 3. Configure environment
 
-## Code of Conduct
+```bash
+cp .env.example .env
+php artisan key:generate
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Edit `.env` and set your database credentials:
 
-## Security Vulnerabilities
+```env
+APP_NAME=TaskManager
+APP_URL=http://your-domain.local
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=taskmanager
+DB_USERNAME=root
+DB_PASSWORD=your_password
+```
+
+> **Note:** If your server's `mysqldump` binary is not on the PATH, set the absolute
+> path in `MYSQLDUMP_PATH` for the `backup:database` command.
+
+### 4. Create the database and run migrations
+
+```bash
+php artisan migrate --force
+```
+
+### 5. Seed demo data (optional)
+
+```bash
+php artisan db:seed --force
+```
+
+### 6. Install frontend dependencies and build assets
+
+```bash
+npm install --ignore-scripts
+npm run build
+```
+
+### 7. Link storage
+
+```bash
+php artisan storage:link
+```
+
+### 8. Start the application
+
+```bash
+php artisan serve
+```
+
+Then open `http://localhost:8000`.
+
+---
+
+## Realtime Notifications (optional)
+
+Realtime notifications use Laravel Reverb:
+
+1. Set the Reverb credentials in `.env` (pre-filled in `.env.example`).
+2. If you change them, publish fresh values:
+
+```bash
+php artisan reverb:start
+```
+
+3. Run a queue worker in a separate terminal:
+
+```bash
+php artisan queue:listen --tries=1 --timeout=0
+```
+
+> Without the queue worker and Reverb server, the app still works correctly —
+> only live/broadcast notifications are disabled.
+
+---
+
+## Usage
+
+### Demo accounts (after seeding)
+
+| Role    | Email                     | Password |
+| ------- | ------------------------- | -------- |
+| Admin   | `admin@taskmanager.local`  | `password` |
+| Manager | `manager@taskmanager.local` | `password` |
+| Staff   | `staff@taskmanager.local`  | `password` |
+
+### Workflow
+
+1. **Admin** creates users and customers.
+2. **Manager/Staff** create tasks assigned to customers.
+3. Tasks move through the general-purpose workflow; the current user's role controls which transitions are allowed.
+4. Export the task list to PDF or Excel from the Tasks page.
+
+---
+
+## Scheduled Backups
+
+Set up a scheduler entry to run the daily database backup automatically:
+
+```bash
+* * * * * cd /path/to/taskmanager && php artisan schedule:run >> /dev/null 2>&1
+```
+
+Manual backup:
+
+```bash
+php artisan backup:database
+```
+
+---
+
+## Development
+
+```bash
+npm run dev          # Vite dev server with HMR
+php artisan serve    # Laravel dev server
+php artisan pail     # Tail the logs
+```
+
+Run the test suite:
+
+```bash
+composer test
+```
+
+---
+
+## Project Structure
+
+```
+app/
+  Console/Commands/      # DatabaseBackupCommand
+  Enums/                 # TaskStatus workflow enum
+  Http/Controllers/      # Dashboard, Task, Customer, User, Export controllers
+  Models/                # User, Role, Customer, Task
+  Services/              # Service layer (TaskService, etc.)
+resources/
+  js/
+    components/          # Reusable React components
+    layouts/             # App layout, Sidebar, Navbar
+    pages/               # Inertia pages
+    types/               # TypeScript types
+database/
+  migrations/            # Schema migrations
+  seeders/               # Roles, users, customers, tasks
+routes/
+  web.php                # Web routes
+```
+
+---
+
+## Security
+
+- CSRF protection enabled
+- Form Request validation on all writes
+- Role-based authorization (Admin-only write actions for users/customers)
+- Mass-assignment protection
+
+---
 
 ## License
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+This project is proprietary. See the CodeSter listing for license terms.

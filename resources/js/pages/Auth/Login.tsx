@@ -31,16 +31,16 @@ export default function Login({
             <Head title="Log in" />
 
             <div className="mb-6">
-                <h2 className="text-xl font-semibold text-gray-900">
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
                     Sign in to your account
                 </h2>
-                <p className="mt-1 text-sm text-gray-500">
+                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
                     Enter your credentials to continue.
                 </p>
             </div>
 
             {status && (
-                <div className="mb-4 rounded-md bg-green-50 px-3 py-2 text-sm font-medium text-green-700">
+                <div className="mb-4 rounded-md bg-green-50 px-3 py-2 text-sm font-medium text-green-700 dark:bg-green-500/10 dark:text-green-400">
                     {status}
                 </div>
             )}
@@ -82,7 +82,7 @@ export default function Login({
                     {canResetPassword && (
                         <Link
                             href={route('password.request')}
-                            className="text-sm font-medium text-primary-600 hover:text-primary-700"
+                            className="text-sm font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300"
                         >
                             Forgot your password?
                         </Link>
@@ -99,7 +99,7 @@ export default function Login({
                 </Button>
             </form>
 
-            <p className="mt-6 text-center text-sm text-gray-500">
+            <p className="mt-6 text-center text-sm text-gray-500 dark:text-gray-400">
                 Don't have an account?{' '}
                 <Link
                     href={route('register')}

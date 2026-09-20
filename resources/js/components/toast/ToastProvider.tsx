@@ -28,9 +28,11 @@ interface ToastContextValue {
 const ToastContext = createContext<ToastContextValue | null>(null);
 
 const toastTypeClasses: Record<ToastType, string> = {
-    success: 'border-green-200 bg-green-50 text-green-800',
-    error: 'border-red-200 bg-red-50 text-red-800',
-    info: 'border-primary-200 bg-primary-50 text-primary-800',
+    success:
+        'border-green-200 bg-green-50 text-green-800 dark:border-green-800 dark:bg-green-950 dark:text-green-300',
+    error:
+        'border-red-200 bg-red-50 text-red-800 dark:border-red-800 dark:bg-red-950 dark:text-red-300',
+    info: 'border-primary-200 bg-primary-50 text-primary-800 dark:border-primary-800 dark:bg-primary-950 dark:text-primary-300',
 };
 
 const toastIconClasses: Record<ToastType, string> = {

@@ -190,7 +190,7 @@ function UserFormModal({ open, onClose, roles, editingUser }: UserFormModalProps
                 <div className="space-y-1.5">
                     <label
                         htmlFor="user-role"
-                        className="block text-sm font-medium text-gray-700"
+                        className="block text-sm font-medium text-gray-700 dark:text-gray-300"
                     >
                         Role
                     </label>
@@ -200,7 +200,7 @@ function UserFormModal({ open, onClose, roles, editingUser }: UserFormModalProps
                         onChange={(event) =>
                             setData('role_id', Number(event.target.value))
                         }
-                        className="block w-full rounded-md border-0 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-primary-600"
+                        className="block w-full rounded-md border-0 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-primary-600 dark:bg-gray-800 dark:text-gray-100 dark:ring-gray-600 dark:focus:ring-primary-500"
                     >
                         <option value="">Select a role...</option>
                         {roles.map((role) => (
@@ -210,7 +210,7 @@ function UserFormModal({ open, onClose, roles, editingUser }: UserFormModalProps
                         ))}
                     </select>
                     {errors.role_id && (
-                        <p className="text-xs text-red-600">{errors.role_id}</p>
+                        <p className="text-xs text-red-600 dark:text-red-400">{errors.role_id}</p>
                     )}
                 </div>
             </form>
@@ -239,7 +239,7 @@ export default function UsersIndex({ users, roles }: UsersProps) {
                 key: 'name',
                 header: 'Name',
                 cell: (user) => (
-                    <span className="font-medium text-gray-900">
+                    <span className="font-medium text-gray-900 dark:text-gray-100">
                         {user.name}
                     </span>
                 ),
@@ -248,7 +248,7 @@ export default function UsersIndex({ users, roles }: UsersProps) {
                 key: 'email',
                 header: 'Email',
                 cell: (user) => (
-                    <span className="text-gray-500">{user.email}</span>
+                    <span className="text-gray-500 dark:text-gray-400">{user.email}</span>
                 ),
             },
             {
@@ -280,7 +280,7 @@ export default function UsersIndex({ users, roles }: UsersProps) {
                             updateRole(user, Number(event.target.value))
                         }
                         disabled={savingId === user.id}
-                        className="block w-full rounded-md border-0 bg-white px-2.5 py-1.5 text-sm text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-primary-600 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-500"
+                        className="block w-full rounded-md border-0 bg-white px-2.5 py-1.5 text-sm text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-primary-600 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-500 dark:bg-gray-800 dark:text-gray-100 dark:ring-gray-600 dark:disabled:bg-gray-900 dark:disabled:text-gray-500 dark:focus:ring-primary-500"
                         aria-label={`Change role for ${user.name}`}
                     >
                         <option value="">No role</option>
@@ -296,7 +296,7 @@ export default function UsersIndex({ users, roles }: UsersProps) {
                 key: 'joined',
                 header: 'Joined',
                 cell: (user) => (
-                    <span className="text-gray-500">{user.created_at}</span>
+                    <span className="text-gray-500 dark:text-gray-400">{user.created_at}</span>
                 ),
             },
             {
@@ -344,10 +344,10 @@ export default function UsersIndex({ users, roles }: UsersProps) {
             <div className="space-y-6">
                 <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
                     <div>
-                        <h2 className="text-2xl font-semibold text-gray-900">
+                        <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
                             Users
                         </h2>
-                        <p className="mt-1 text-sm text-gray-500">
+                        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
                             Manage team members and their roles.
                         </p>
                     </div>
@@ -360,7 +360,7 @@ export default function UsersIndex({ users, roles }: UsersProps) {
                     rows={users.data}
                     rowKey={(user) => user.id}
                     emptyState={
-                        <span className="text-sm text-gray-500">
+                        <span className="text-sm text-gray-500 dark:text-gray-400">
                             No users found.
                         </span>
                     }
@@ -368,7 +368,7 @@ export default function UsersIndex({ users, roles }: UsersProps) {
 
                 {users.meta.last_page > 1 && (
                     <nav className="flex flex-col items-center justify-between gap-3 sm:flex-row">
-                        <p className="text-sm text-gray-500">
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
                             Showing {start}&ndash;{end} of {users.meta.total}
                         </p>
 
@@ -383,7 +383,7 @@ export default function UsersIndex({ users, roles }: UsersProps) {
                                             'rounded-md border px-3 py-1.5 text-sm font-medium transition',
                                             link.active
                                                 ? 'border-primary-600 bg-primary-600 text-white'
-                                                : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50',
+                                                : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700',
                                         )}
                                     >
                                         {cleanLabel(link.label)}
@@ -391,7 +391,7 @@ export default function UsersIndex({ users, roles }: UsersProps) {
                                 ) : (
                                     <span
                                         key={index}
-                                        className="rounded-md border border-transparent px-3 py-1.5 text-sm text-gray-400"
+                                        className="rounded-md border border-transparent px-3 py-1.5 text-sm text-gray-400 dark:text-gray-600"
                                     >
                                         {cleanLabel(link.label)}
                                     </span>

@@ -15,9 +15,9 @@ class DatabaseSeeder extends Seeder
         $this->call([RoleSeeder::class]);
 
         $demoUsers = [
-            ['name' => 'Admin', 'email' => 'admin@flexmania.local', 'role' => 'admin'],
-            ['name' => 'Manager', 'email' => 'manager@flexmania.local', 'role' => 'manager'],
-            ['name' => 'Staff', 'email' => 'staff@flexmania.local', 'role' => 'staff'],
+            ['name' => 'Admin', 'email' => 'admin@taskmanager.local', 'role' => 'admin'],
+            ['name' => 'Manager', 'email' => 'manager@taskmanager.local', 'role' => 'manager'],
+            ['name' => 'Staff', 'email' => 'staff@taskmanager.local', 'role' => 'staff'],
         ];
 
         foreach ($demoUsers as $demo) {

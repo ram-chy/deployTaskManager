@@ -22,11 +22,11 @@ const NotificationContext = createContext<NotificationContextValue | null>(
 );
 
 const statusLabel: Record<string, string> = {
-    submit_for_design: 'Submit For Design',
-    send_for_approve: 'Send for Approve',
-    approved: 'Approved',
-    send_for_print: 'Send for Print',
-    print_complete: 'Print Complete',
+    pending: 'Pending',
+    in_progress: 'In Progress',
+    under_review: 'Under Review',
+    completed: 'Completed',
+    cancelled: 'Cancelled',
 };
 
 export default function NotificationProvider({

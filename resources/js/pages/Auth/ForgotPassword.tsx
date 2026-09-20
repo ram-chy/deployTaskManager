@@ -20,17 +20,17 @@ export default function ForgotPassword({ status }: { status?: string }) {
             <Head title="Forgot Password" />
 
             <div className="mb-6">
-                <h2 className="text-xl font-semibold text-gray-900">
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
                     Forgot your password?
                 </h2>
-                <p className="mt-1 text-sm text-gray-500">
+                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
                     Enter your email address and we will send you a link to
                     reset your password.
                 </p>
             </div>
 
             {status && (
-                <div className="mb-4 rounded-md bg-green-50 px-3 py-2 text-sm font-medium text-green-700">
+                <div className="mb-4 rounded-md bg-green-50 px-3 py-2 text-sm font-medium text-green-700 dark:bg-green-500/10 dark:text-green-400">
                     {status}
                 </div>
             )}

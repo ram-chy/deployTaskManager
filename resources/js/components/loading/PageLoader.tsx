@@ -35,9 +35,9 @@ export default function PageLoader() {
             className="fixed inset-0 z-[70] flex items-center justify-center bg-gray-900/30 backdrop-blur-[1px]"
             aria-hidden="true"
         >
-            <div className="flex flex-col items-center gap-3 rounded-xl bg-white px-6 py-5 shadow-xl">
+            <div className="flex flex-col items-center gap-3 rounded-xl bg-white px-6 py-5 shadow-xl dark:bg-gray-900 dark:ring-1 dark:ring-gray-800">
                 <svg
-                    className="h-8 w-8 animate-spin text-primary-600"
+                    className="h-8 w-8 animate-spin text-primary-600 dark:text-primary-400"
                     viewBox="0 0 24 24"
                     fill="none"
                 >
@@ -55,7 +55,7 @@ export default function PageLoader() {
                         d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
                     />
                 </svg>
-                <span className="text-sm font-medium text-gray-600">
+                <span className="text-sm font-medium text-gray-600 dark:text-gray-300">
                     Loading...
                 </span>
             </div>

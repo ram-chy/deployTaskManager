@@ -2,6 +2,8 @@
 
 @plugin "@tailwindcss/forms";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @source "../views";
 
 @theme {

@@ -151,7 +151,7 @@ function CustomerFormModal({ open, onClose, customer }: CustomerFormModalProps) 
                 <div className="space-y-1.5">
                     <label
                         htmlFor="customer-notes"
-                        className="block text-sm font-medium text-gray-700"
+                        className="block text-sm font-medium text-gray-700 dark:text-gray-300"
                     >
                         Notes
                     </label>
@@ -160,10 +160,10 @@ function CustomerFormModal({ open, onClose, customer }: CustomerFormModalProps) 
                         rows={3}
                         value={data.notes}
                         onChange={(event) => setData('notes', event.target.value)}
-                        className="block w-full rounded-md border-0 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary-600"
+                        className="block w-full rounded-md border-0 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary-600 dark:bg-gray-800 dark:text-gray-100 dark:ring-gray-600 dark:placeholder:text-gray-500 dark:focus:ring-primary-500"
                     />
                     {errors.notes && (
-                        <p className="text-xs text-red-600">{errors.notes}</p>
+                        <p className="text-xs text-red-600 dark:text-red-400">{errors.notes}</p>
                     )}
                 </div>
             </form>
@@ -283,7 +283,7 @@ export default function CustomersIndex({
                 key: 'name',
                 header: 'Name',
                 cell: (customer) => (
-                    <span className="font-medium text-gray-900">
+                    <span className="font-medium text-gray-900 dark:text-gray-100">
                         {customer.name}
                     </span>
                 ),
@@ -292,9 +292,9 @@ export default function CustomersIndex({
                 key: 'email',
                 header: 'Email',
                 cell: (customer) => (
-                    <span className="text-gray-500">
+                    <span className="text-gray-500 dark:text-gray-400">
                         {customer.email ?? (
-                            <span className="text-gray-400">&mdash;</span>
+                            <span className="text-gray-400 dark:text-gray-500">&mdash;</span>
                         )}
                     </span>
                 ),
@@ -303,9 +303,9 @@ export default function CustomersIndex({
                 key: 'phone',
                 header: 'Phone',
                 cell: (customer) => (
-                    <span className="text-gray-500">
+                    <span className="text-gray-500 dark:text-gray-400">
                         {customer.phone ?? (
-                            <span className="text-gray-400">&mdash;</span>
+                            <span className="text-gray-400 dark:text-gray-500">&mdash;</span>
                         )}
                     </span>
                 ),
@@ -314,9 +314,9 @@ export default function CustomersIndex({
                 key: 'notes',
                 header: 'Notes',
                 cell: (customer) => (
-                    <span className="line-clamp-1 max-w-xs text-gray-500">
+                    <span className="line-clamp-1 max-w-xs text-gray-500 dark:text-gray-400">
                         {customer.notes ?? (
-                            <span className="text-gray-400">&mdash;</span>
+                            <span className="text-gray-400 dark:text-gray-500">&mdash;</span>
                         )}
                     </span>
                 ),
@@ -325,7 +325,7 @@ export default function CustomersIndex({
                 key: 'created_at',
                 header: 'Added',
                 cell: (customer) => (
-                    <span className="text-gray-500">{customer.created_at}</span>
+                    <span className="text-gray-500 dark:text-gray-400">{customer.created_at}</span>
                 ),
             },
             ...(can.manage
@@ -345,7 +345,7 @@ export default function CustomersIndex({
                                   <Button
                                       variant="ghost"
                                       size="sm"
-                                      className="text-red-600 hover:bg-red-50 hover:text-red-700"
+                                      className="text-red-600 hover:bg-red-50 hover:text-red-700 dark:text-red-400 dark:hover:bg-red-500/10 dark:hover:text-red-300"
                                       onClick={() =>
                                           setDeletingCustomer(customer)
                                       }
@@ -377,10 +377,10 @@ export default function CustomersIndex({
             <div className="space-y-6">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                     <div>
-                        <h2 className="text-2xl font-semibold text-gray-900">
+                        <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
                             Customers
                         </h2>
-                        <p className="mt-1 text-sm text-gray-500">
+                        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
                             View and manage your customer records.
                         </p>
                     </div>
@@ -392,7 +392,7 @@ export default function CustomersIndex({
 
                 <div className="max-w-sm">
                     <div className="relative">
-                        <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                        <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400 dark:text-gray-500">
                             <svg
                                 className="h-4 w-4"
                                 viewBox="0 0 24 24"
@@ -412,7 +412,7 @@ export default function CustomersIndex({
                                 setSearchInput(event.target.value)
                             }
                             placeholder="Search by name, email or phone..."
-                            className="block w-full rounded-md border-0 bg-white py-2 pl-10 pr-3 text-sm text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary-600"
+                            className="block w-full rounded-md border-0 bg-white py-2 pl-10 pr-3 text-sm text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary-600 dark:bg-gray-800 dark:text-gray-100 dark:ring-gray-600 dark:placeholder:text-gray-500 dark:focus:ring-primary-500"
                         />
                     </div>
                 </div>
@@ -422,9 +422,8 @@ export default function CustomersIndex({
                     rows={customers.data}
                     rowKey={(customer) => customer.id}
                     emptyState={
-                        <span className="text-sm text-gray-500">
-                            No customers found.
-                            {filters.search
+                        <span className="text-sm text-gray-500 dark:text-gray-400">
+                            No customers found.                            {filters.search
                                 ? ' Try adjusting your search.'
                                 : ''}
                         </span>
@@ -433,7 +432,7 @@ export default function CustomersIndex({
 
                 {customers.meta.last_page > 1 && (
                     <nav className="flex flex-col items-center justify-between gap-3 sm:flex-row">
-                        <p className="text-sm text-gray-500">
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
                             Showing {start}&ndash;{end} of {customers.meta.total}
                         </p>
 
@@ -448,7 +447,7 @@ export default function CustomersIndex({
                                             'rounded-md border px-3 py-1.5 text-sm font-medium transition',
                                             link.active
                                                 ? 'border-primary-600 bg-primary-600 text-white'
-                                                : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50',
+                                                : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700',
                                         )}
                                     >
                                         {cleanLabel(link.label)}
@@ -456,7 +455,7 @@ export default function CustomersIndex({
                                 ) : (
                                     <span
                                         key={index}
-                                        className="rounded-md border border-transparent px-3 py-1.5 text-sm text-gray-400"
+                                        className="rounded-md border border-transparent px-3 py-1.5 text-sm text-gray-400 dark:text-gray-600"
                                     >
                                         {cleanLabel(link.label)}
                                     </span>

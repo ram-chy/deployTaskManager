@@ -41,16 +41,16 @@ export default function ErrorPage({ status }: { status: number }) {
         };
 
     return (
-        <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50 px-4">
+        <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50 px-4 dark:bg-gray-950">
             <Head title={info.title} />
 
-            <p className="text-7xl font-bold text-primary-600">{status}</p>
+            <p className="text-7xl font-bold text-primary-600 dark:text-primary-400">{status}</p>
 
-            <h1 className="mt-4 text-2xl font-semibold text-gray-900">
+            <h1 className="mt-4 text-2xl font-semibold text-gray-900 dark:text-gray-100">
                 {info.title}
             </h1>
 
-            <p className="mt-2 max-w-md text-center text-sm text-gray-500">
+            <p className="mt-2 max-w-md text-center text-sm text-gray-500 dark:text-gray-400">
                 {info.message}
             </p>
 
