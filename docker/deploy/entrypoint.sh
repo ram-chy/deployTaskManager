@@ -71,6 +71,14 @@ fi
 
 php artisan storage:link --quiet 2>/dev/null || true
 
+# PHP-FPM runs as www-data. Ensure the (SQLite) database and runtime dirs
+# created by the root-run migrations above are writable by it.
+chown -R www-data:www-data \
+    storage \
+    bootstrap/cache \
+    "$(dirname "${DB_DATABASE:-${APP_DIR}/database/database.sqlite}")" \
+    2>/dev/null || true
+
 # ---------------------------------------------------------------------------
 # 5. Optional Reverb push server (enabled with START_REVERB=true)
 # ---------------------------------------------------------------------------
