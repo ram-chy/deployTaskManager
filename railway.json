@@ -24,6 +24,7 @@
     "SESSION_DRIVER": "database",
     "QUEUE_CONNECTION": "database",
     "CACHE_STORE": "database",
+    "TRUSTED_PROXIES": "*",
     "START_REVERB": "false"
   }
 }

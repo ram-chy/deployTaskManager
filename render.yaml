@@ -42,5 +42,7 @@ services:
         value: database
       - key: CACHE_STORE
         value: database
+      - key: TRUSTED_PROXIES
+        value: "*"
       - key: START_REVERB
         value: "false"

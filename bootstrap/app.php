@@ -27,6 +27,27 @@ return Application::configure(basePath: dirname(__DIR__))
             AddLinkHeadersForPreloadedAssets::class,
         ]);
 
+        // Render (and any TLS-terminating reverse proxy) forwards plain HTTP to
+        // the container, so the request arrives with scheme "http" unless the
+        // forwarded headers are trusted. Without this, Laravel emits
+        // http:// asset/redirect URLs on an https:// page and the browser
+        // blocks them as mixed content. Override with TRUSTED_PROXIES=10.0.0.1
+        // (comma separated) to trust specific proxies instead of all.
+        // Note: TrustProxies compares the value against the literal string
+        // '*' with ===, so keep it a string rather than ['*'].
+        $trustedProxies = (string) env('TRUSTED_PROXIES', '*');
+
+        $middleware->trustProxies(
+            at: str_contains($trustedProxies, ',')
+                ? array_map('trim', explode(',', $trustedProxies))
+                : $trustedProxies,
+            headers: Request::HEADER_X_FORWARDED_FOR
+                | Request::HEADER_X_FORWARDED_HOST
+                | Request::HEADER_X_FORWARDED_PORT
+                | Request::HEADER_X_FORWARDED_PROTO
+                | Request::HEADER_X_FORWARDED_AWS_ELB,
+        );
+
         $middleware->alias([
             'role' => EnsureUserHasRole::class,
         ]);
