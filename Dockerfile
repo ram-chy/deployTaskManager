@@ -27,7 +27,7 @@ RUN composer install \
         --prefer-dist \
         --no-interaction \
         --no-progress \
-        --ignore-platform-req=php
+        --ignore-platform-reqs
 
 COPY . .
 
@@ -36,7 +36,7 @@ RUN composer install \
         --optimize-autoloader \
         --no-interaction \
         --no-progress \
-        --ignore-platform-req=php
+        --ignore-platform-reqs
 
 ###############################################################################
 # Stage 3 — Runtime: Nginx + PHP-FPM 8.4 + Supervisor
