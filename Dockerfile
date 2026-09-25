@@ -61,6 +61,7 @@ RUN apt-get update \
         libzip-dev \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install pdo_mysql pdo_sqlite gd zip opcache \
+    && printf '\nclear_env = no\ncatch_workers_output = yes\n' >> /usr/local/etc/php-fpm.d/www.conf \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* /var/log/apt \
     && mkdir -p \
