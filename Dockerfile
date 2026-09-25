@@ -57,6 +57,7 @@ RUN apt-get update \
         libfreetype-dev \
         libjpeg-dev \
         libpng-dev \
+        libsqlite3-dev \
         libzip-dev \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install pdo_mysql pdo_sqlite gd zip opcache \
