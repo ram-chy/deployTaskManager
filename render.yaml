@@ -1,13 +1,19 @@
 # Render blueprint (free tier) — single-service demo using SQLite.
 #
 # Notes:
+#   * Render injects PORT (default 10000) and proxies traffic to
+#     0.0.0.0:$PORT only. The entrypoint renders docker/deploy/nginx.conf.tpl
+#     with that port at boot, so no PORT value is hardcoded here.
 #   * Free services are ephemeral — the demo DB is rebuilt from seed on every
 #     deploy/restart. That gives each visitor a fresh demo data set.
+#   * Free instances also spin down after ~15 min idle and restart on the next
+#     request. Sessions live in the (ephemeral) database, so visitors are logged
+#     out after a spin-down. Seeders are idempotent, so restarts are safe.
 #   * To use MySQL instead, add DB_HOST/DB_PORT/DB_DATABASE/DB_USERNAME/
 #     DB_PASSWORD and set DB_CONNECTION=mysql (Render has no managed MySQL,
 #     so point it at any MySQL you control).
-#   * Change `repo` to your repository URL and commit via
-#     the Render dashboard ("Blueprint" → paste this file).
+#   * `repo` below is the deploy remote (ram-chy/deployTaskManager); change it
+#     if you fork.
 services:
   - type: web
     name: taskmanager

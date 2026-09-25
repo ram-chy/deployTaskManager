@@ -78,8 +78,8 @@ WORKDIR /var/www/html
 COPY --from=vendor /app /var/www/html
 COPY --from=frontend /app/public/build /var/www/html/public/build
 
-# Server configuration
-COPY docker/deploy/nginx.conf       /etc/nginx/sites-available/default
+# Server configuration (nginx.conf.tpl is rendered at boot with $PORT)
+COPY docker/deploy/nginx.conf.tpl   /docker/deploy/nginx.conf.tpl
 COPY docker/deploy/supervisord.conf /etc/supervisor/supervisord.conf
 COPY docker/deploy/entrypoint.sh    /usr/local/bin/docker-entrypoint.sh
 COPY docker/deploy/reverb.conf.tpl  /docker/deploy/reverb.conf.tpl
@@ -91,5 +91,8 @@ RUN chmod +x /usr/local/bin/docker-entrypoint.sh \
         /var/www/html/public
 
 EXPOSE 80
+
+# Render/Railway inject PORT (default 10000); the entrypoint rebinds nginx to
+# 0.0.0.0:$PORT at boot. 80 remains the default when PORT is unset (Compose).
 
 ENTRYPOINT ["docker-entrypoint.sh"]

@@ -1,6 +1,6 @@
 server {
-    listen 80 default_server;
-    listen [::]:80 default_server;
+    listen __PORT__ default_server;
+    listen [::]:__PORT__ default_server;
     server_name _;
 
     root /var/www/html/public;

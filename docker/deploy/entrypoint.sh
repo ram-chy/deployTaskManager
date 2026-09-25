@@ -27,6 +27,18 @@ if [ -n "${RAILWAY_PUBLIC_DOMAIN:-}" ]; then
 fi
 
 # ---------------------------------------------------------------------------
+# 2b. Bind nginx to the platform-assigned port.
+#
+# Render injects PORT (default 10000) and only proxies traffic to 0.0.0.0:$PORT,
+# so a hardcoded "listen 80" fails the health check there. Fall back to 80 for
+# docker-compose and any host that does not set PORT.
+# ---------------------------------------------------------------------------
+HTTP_PORT="${PORT:-80}"
+echo "-> Nginx listening on 0.0.0.0:${HTTP_PORT}"
+sed -e "s|__PORT__|${HTTP_PORT}|g" \
+    /docker/deploy/nginx.conf.tpl > /etc/nginx/sites-available/default
+
+# ---------------------------------------------------------------------------
 # 3. Prepare the database (wait for MySQL, or bootstrap a SQLite file)
 # ---------------------------------------------------------------------------
 CONNECTION="${DB_CONNECTION:-mysql}"

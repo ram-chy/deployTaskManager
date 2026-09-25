@@ -230,6 +230,14 @@ Open `http://localhost:8000`. MySQL and demo data are provisioned automatically.
 3. Change `repo` in `render.yaml` to your repo URL if you use the dashboard form.
 4. After deploy, generated data is ephemeral (SQLite, rebuilt on each deploy).
 
+> Render only proxies traffic to `0.0.0.0:$PORT` (default `10000`). The
+> container entrypoint renders `docker/deploy/nginx.conf.tpl` with that port at
+> boot, so no port is hardcoded — nothing to configure.
+>
+> Free instances also spin down after ~15 min idle and restart on the next
+> request. Sessions live in the ephemeral database, so visitors are logged out
+> afterwards. The seeders are idempotent, so restarts do not duplicate data.
+
 ### 3. Railway
 
 1. Push to GitHub and create a Railway project.
