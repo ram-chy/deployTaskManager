@@ -9,6 +9,7 @@ services:
     environment:
       APP_ENV: production
       APP_DEBUG: "false"
+      LOG_CHANNEL: stderr
       APP_URL: http://localhost:8000
       APP_LOCALE: en
       APP_SEED_DEMO: "true"
