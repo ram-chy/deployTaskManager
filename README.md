@@ -209,6 +209,50 @@ php artisan backup:database
 
 ---
 
+## Deployment (Docker demo)
+
+The repo ships with a Docker setup (`Dockerfile`, `docker-compose.yml`,
+`render.yaml`, `railway.json`) so you can stand up a demo in a few minutes.
+
+### 1. Local demo (Docker Compose)
+
+```bash
+cp .env.example .env      # optional; the container provides its own values
+docker compose up --build
+```
+
+Open `http://localhost:8000`. MySQL and demo data are provisioned automatically.
+
+### 2. Render (free tier)
+
+1. Push the repo to GitHub.
+2. In Render, **New → Blueprint**, point it at the repo, choose `render.yaml`.
+3. Change `repo` in `render.yaml` to your repo URL if you use the dashboard form.
+4. After deploy, generated data is ephemeral (SQLite, rebuilt on each deploy).
+
+### 3. Railway
+
+1. Push to GitHub and create a Railway project.
+2. Add a **MySQL** plugin and name it `MySQL`.
+3. Deploy the repo — Railway uses `railway.json`, which wires up the app to the
+   MySQL plugin automatically.
+
+### Demo accounts (seeded with `APP_SEED_DEMO=true`)
+
+| Role    | Email                     | Password |
+| ------- | ------------------------- | -------- |
+| Admin   | `admin@taskmanager.local`  | `password` |
+| Manager | `manager@taskmanager.local` | `password` |
+| Staff   | `staff@taskmanager.local`  | `password` |
+
+### Realtime notifications (optional)
+
+The demo runs without websockets by default. To enable Laravel Reverb, set
+`START_REVERB=true` and export port **8080** in your hosting platform (public
+TCP ports are only available on paid plans on most hosts).
+
+---
+
 ## Development
 
 ```bash

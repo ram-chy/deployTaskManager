@@ -1,0 +1,29 @@
+{
+  "$schema": "https://railway.app/railway.schema.json",
+  "build": {
+    "builder": "DOCKERFILE",
+    "dockerfilePath": "Dockerfile"
+  },
+  "deploy": {
+    "numReplicas": 1,
+    "healthcheckPath": "/",
+    "restartPolicyType": "ON_FAILURE",
+    "restartPolicyMaxRetries": 10
+  },
+  "env": {
+    "APP_ENV": "production",
+    "APP_DEBUG": "false",
+    "APP_SEED_DEMO": "true",
+    "DB_CONNECTION": "mysql",
+    "DB_HOST": "${{MySQL.MYSQLHOST}}",
+    "DB_PORT": "${{MySQL.MYSQLPORT}}",
+    "DB_DATABASE": "${{MySQL.MYSQLDATABASE}}",
+    "DB_USERNAME": "${{MySQL.MYSQLUSER}}",
+    "DB_PASSWORD": "${{MySQL.MYSQLPASSWORD}}",
+    "SESSION_DRIVER": "database",
+    "QUEUE_CONNECTION": "database",
+    "CACHE_STORE": "database",
+    "BROADCAST_CONNECTION": "reverb",
+    "START_REVERB": "false"
+  }
+}

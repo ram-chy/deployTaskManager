@@ -1,0 +1,40 @@
+# Render blueprint (free tier) — single-service demo using SQLite.
+#
+# Notes:
+#   * Free services are ephemeral — the demo DB is rebuilt from seed on every
+#     deploy/restart. That gives each visitor a fresh demo data set.
+#   * To use MySQL instead, add DB_HOST/DB_PORT/DB_DATABASE/DB_USERNAME/
+#     DB_PASSWORD and set DB_CONNECTION=mysql (Render has no managed MySQL,
+#     so point it at any MySQL you control).
+#   * Change `repo` to your repository URL and commit via
+#     the Render dashboard ("Blueprint" → paste this file).
+services:
+  - type: web
+    name: taskmanager
+    runtime: docker
+    repo: https://github.com/ram-chy/deployTaskManager.git
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /
+    autoDeploy: true
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: "false"
+      - key: APP_SEED_DEMO
+        value: "true"
+      - key: DB_CONNECTION
+        value: sqlite
+      - key: DB_DATABASE
+        value: /var/www/html/database/database.sqlite
+      - key: SESSION_DRIVER
+        value: database
+      - key: QUEUE_CONNECTION
+        value: database
+      - key: CACHE_STORE
+        value: database
+      - key: BROADCAST_CONNECTION
+        value: reverb
+      - key: START_REVERB
+        value: "false"

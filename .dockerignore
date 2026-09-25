@@ -1,0 +1,55 @@
+# Version control
+.git
+.gitignore
+.gitattributes
+
+# Local environment
+.env
+.env.*
+!.env.example
+
+# Node
+node_modules
+public/build
+public/hot
+public/fonts-manifest.dev.json
+
+# PHP
+vendor
+storage/*.key
+storage/logs/*
+storage/framework/cache/*
+storage/framework/sessions/*
+storage/framework/views/*
+storage/framework/testing/*
+storage/pail
+bootstrap/cache/*
+_bak
+_ide_helper.php
+
+# Storage link target (created at runtime)
+public/storage
+
+# IDE / editor
+.idea
+.vscode
+.zed
+.cursor
+.codex
+.nova
+.phpactor.json
+
+# Tests / tooling (not needed at runtime)
+tests
+stubs
+codester-submission
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+.phpunit.cache
+.phpunit.result.cache
+.artisan_swear
