@@ -9,8 +9,12 @@ cd "$APP_DIR"
 # ---------------------------------------------------------------------------
 if [ -z "${APP_KEY:-}" ]; then
     echo "-> Generating APP_KEY ..."
-    APP_KEY="$(php artisan key:generate --show --ansi | tail -n1)"
+    # No --ansi here: it wraps the output in colour escapes, which corrupts the
+    # base64 key and makes every request fail with "Unsupported cipher or
+    # incorrect key length". --no-ansi is the default, but be explicit.
+    APP_KEY="$(php artisan key:generate --show --no-ansi 2>/dev/null | tr -d '\r' | tail -n1)"
     export APP_KEY
+    echo "-> APP_KEY generated (len=${#APP_KEY})"
 fi
 
 # ---------------------------------------------------------------------------

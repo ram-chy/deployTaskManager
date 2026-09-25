@@ -22,6 +22,10 @@ server {
         fastcgi_index index.php;
         fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
         include fastcgi_params;
+        # Debian's fastcgi_params maps HTTP_HOST to $host, which drops the port.
+        # Laravel then generates URLs without it and every asset/link breaks
+        # whenever the app is served on a non-default port. Restore $http_host.
+        fastcgi_param HTTP_HOST $http_host;
     }
 
     location ~ /\.(?!well-known).* {
