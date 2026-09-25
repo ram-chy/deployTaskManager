@@ -34,7 +34,5 @@ services:
         value: database
       - key: CACHE_STORE
         value: database
-      - key: BROADCAST_CONNECTION
-        value: reverb
       - key: START_REVERB
         value: "false"

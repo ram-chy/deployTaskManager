@@ -55,6 +55,12 @@ fi
 # ---------------------------------------------------------------------------
 # 4. Migrations + optional demo data
 # ---------------------------------------------------------------------------
+# Broadcasting needs a running Reverb/Pusher server. Disable it unless the
+# demo explicitly enables the Reverb process (START_REVERB=true).
+if [ "${START_REVERB:-false}" != "true" ]; then
+    export BROADCAST_CONNECTION="null"
+fi
+
 echo "-> Running migrations ..."
 php artisan migrate --force --no-interaction
 

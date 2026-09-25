@@ -21,7 +21,6 @@ services:
       SESSION_DRIVER: database
       QUEUE_CONNECTION: database
       CACHE_STORE: database
-      BROADCAST_CONNECTION: reverb
       START_REVERB: "false"
     depends_on:
       mysql:
