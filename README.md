@@ -234,35 +234,38 @@ There is no buildpack fallback either. Guides describing a "select PHP from the
 list" dropdown and `php artisan serve --port=$PORT` are outdated; that approach
 predates Render dropping native PHP support.
 
-`render.yaml` in this repo therefore ships **without** a `runtime` field on
-purpose. Syncing the Blueprint fails validation immediately with a clear
-message rather than after a long, opaque build. To deploy, add a `Dockerfile`
-and set `runtime: docker`.
+### Deploying to Render
 
-### Deploying to Render (with a Dockerfile)
+The repo ships a `Dockerfile` and a `render.yaml` Blueprint, so this works as-is:
 
-1. Add a `Dockerfile` to the repo root. Keep it minimal — for a demo you do not
-   need nginx, PHP-FPM and supervisord. A single PHP process is enough:
+1. Push the repo to GitHub.
+2. In Render choose **New → Blueprint** and point it at the repo.
+3. The Blueprint creates a free web service that builds the Dockerfile and runs
+   the app on SQLite with demo data seeded at boot.
 
-   ```dockerfile
-   FROM php:8.4-cli-alpine
-   WORKDIR /var/www/html
-   RUN apk add --no-cache sqlite nginx supervisor
-   COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
-   COPY . .
-   RUN composer install --no-dev --optimize-autoloader --no-interaction \
-       && npm ci && npm run build \
-       && mkdir -p storage/framework/{cache/data,sessions,views} \
-              storage/logs bootstrap/cache database \
-       && touch database/database.sqlite \
-       && composer dump-autoload -o
-   EXPOSE 80
-   CMD ["/bin/sh", "-c", "php artisan migrate --force && php artisan db:seed --force && php -S 0.0.0.0:${PORT:-80} -t public public/index.php"]
-   ```
+The container is deliberately minimal. It runs **one** PHP process handling HTTP
+directly — no nginx, no PHP-FPM, no supervisord, no queue worker, no Reverb.
+Most of the earlier deploy failures came from that multi-process layer rather
+than from the application.
 
-2. Set `runtime: docker` in `render.yaml`.
-3. Push to GitHub, then in Render choose **New → Blueprint** and point it at
-   the repo.
+| File               | Purpose                                                        |
+| ------------------ | -------------------------------------------------------------- |
+| `Dockerfile`       | 3 build stages: Vite assets, Composer vendor, PHP runtime      |
+| `docker/start.sh`  | Normalises `APP_KEY`, migrates, seeds, then serves on `$PORT`  |
+| `docker/php.ini`   | Memory limit, 256 MB, and error logging to stderr              |
+| `.dockerignore`    | Keeps the host's `vendor/`/`node_modules/` out of the image     |
+
+Two details worth knowing about, because both cause confusing failures:
+
+- **`APP_KEY` is normalised at boot.** Render's `generateValue: true` emits a
+  raw base64 string with no `base64:` prefix. Laravel reads an unprefixed value
+  as a literal cipher key, and AES-256-CBC needs exactly 16 or 32 bytes, so
+  every request fails with *"Unsupported cipher or incorrect key length"*.
+  `docker/start.sh` derives a valid key from it, deterministically so sessions
+  survive restarts.
+- **`config:cache` is not run.** Render supplies environment variables at
+  runtime, so a config cache baked in at build time would freeze stale values
+  (database, `APP_KEY`) into every request.
 
 > Free instances spin down after ~15 minutes of inactivity and their filesystem
 > is wiped on restart. Because the demo database is SQLite and lives on that

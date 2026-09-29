@@ -11,12 +11,9 @@
 # #     you can deploy a Docker image."                                       #
 # #                                                                          #
 # #  This app is Laravel/PHP 8.4. There is no way to serve it on Render     #
-# #  without a container. The `runtime` field below is deliberately left     #
-# #  uncommented-as-invalid so the Blueprint fails validation immediately    #
-# #  with a clear message, rather than after a long, opaque build.           #
-# #                                                                          #
-# #  TO DEPLOY: restore a Dockerfile and set `runtime: docker` (see below).  #
-# #  A minimal one for this app is ~30 lines.                                #
+# #  without a container. The repo ships a minimal Dockerfile (single PHP     #
+# #  process, no nginx/PHP-FPM/supervisord) and this Blueprint is ready to   #
+# #  use as-is. See the "Deployment" section of the README.                  #
 # ############################################################################
 #
 # Free-tier notes:
@@ -31,8 +28,9 @@
 services:
   - type: web
     name: taskmanager
+    runtime: docker
+    dockerfilePath: ./Dockerfile
     plan: free
-    # runtime: docker        <-- required, and the only option for PHP
     healthCheckPath: /up
     autoDeploy: true
     envVars:

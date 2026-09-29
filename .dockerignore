@@ -1,0 +1,46 @@
+# Version control
+.git
+.gitignore
+.gitattributes
+
+# Local environment — must never leak into the image
+.env
+.env.*
+!.env.example
+
+# Installed dependencies. Both are rebuilt inside the image, and copying the
+# host's copies is slow and produces platform-mismatched binaries (a Windows
+# vendor/ tree would be baked into a Linux image).
+node_modules
+vendor
+
+# Built assets — produced by the frontend build stage
+public/build
+public/hot
+public/storage
+
+# Runtime state
+storage/framework/cache/*
+storage/framework/sessions/*
+storage/framework/views/*
+storage/logs/*
+storage/*.key
+storage/pail
+bootstrap/cache/*
+*.log
+.phpunit.result.cache
+.phpunit.cache
+
+# Not needed at runtime
+tests
+codester-submission
+
+# Editors / OS
+.idea
+.vscode
+.zed
+.cursor
+.codex
+.nova
+.DS_Store
+Thumbs.db
