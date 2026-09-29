@@ -31,6 +31,14 @@ bootstrap/cache/*
 .phpunit.result.cache
 .phpunit.cache
 
+# Local SQLite files. The demo database is created and migrated at boot inside
+# the container, so shipping a developer's local copy just wastes image space
+# and can shadow the fresh one.
+database/*.sqlite
+database/*.sqlite-journal
+database/*.sqlite-wal
+database/*.sqlite-shm
+
 # Not needed at runtime
 tests
 codester-submission

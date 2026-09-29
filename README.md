@@ -250,22 +250,35 @@ than from the application.
 
 | File               | Purpose                                                        |
 | ------------------ | -------------------------------------------------------------- |
-| `Dockerfile`       | 3 build stages: Vite assets, Composer vendor, PHP runtime      |
+| `Dockerfile`       | 4 build stages: Vite assets, PHP base, vendor, runtime          |
+| `server.php`       | Router for PHP's built-in server (Laravel 11+ removed its copy) |
 | `docker/start.sh`  | Normalises `APP_KEY`, migrates, seeds, then serves on `$PORT`  |
 | `docker/php.ini`   | Memory limit, 256 MB, and error logging to stderr              |
 | `.dockerignore`    | Keeps the host's `vendor/`/`node_modules/` out of the image     |
 
-Two details worth knowing about, because both cause confusing failures:
+Three details worth knowing about, because each one caused a confusing
+failure that the symptom did not point to:
 
+- **`server.php` must be the router, not `public/index.php`.** PHP's built-in
+  server runs the router for *every* request. Pointing it at the front
+  controller makes `/build/assets/app.js` return the HTML shell with a `200`
+  and `Content-Type: text/html` — so the page loads, no CSS or JavaScript
+  arrives, and the browser shows nothing at all. The router returns `false`
+  for files that exist so the server streams them itself.
+- **`composer:2` cannot be used as a build base.** That tag floats, and it is
+  currently PHP 8.5, while `phpspreadsheet` requires `<8.5.0`. Only the
+  composer *binary* is copied from it; dependencies are installed on the same
+  PHP 8.4 build the app runs on, so no platform checks have to be suppressed.
 - **`APP_KEY` is normalised at boot.** Render's `generateValue: true` emits a
   raw base64 string with no `base64:` prefix. Laravel reads an unprefixed value
   as a literal cipher key, and AES-256-CBC needs exactly 16 or 32 bytes, so
   every request fails with *"Unsupported cipher or incorrect key length"*.
   `docker/start.sh` derives a valid key from it, deterministically so sessions
   survive restarts.
-- **`config:cache` is not run.** Render supplies environment variables at
-  runtime, so a config cache baked in at build time would freeze stale values
-  (database, `APP_KEY`) into every request.
+
+`config:cache` is not run on purpose: Render supplies environment variables at
+runtime, so a config cache baked in at build time would freeze stale values
+(database, `APP_KEY`) into every request.
 
 > Free instances spin down after ~15 minutes of inactivity and their filesystem
 > is wiped on restart. Because the demo database is SQLite and lives on that

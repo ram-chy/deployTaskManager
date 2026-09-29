@@ -83,9 +83,17 @@ php artisan storage:link --quiet 2>/dev/null || true
 # Render injects PORT (default 10000) and routes traffic to 0.0.0.0:$PORT only.
 # PHP_CLI_SERVER_WORKERS forks multiple workers so concurrent asset requests
 # are not serialised behind a single-threaded server.
+#
+# The router argument MUST be server.php, not public/index.php. The built-in
+# server calls the router for every request, so pointing it straight at the
+# front controller makes PHP return the HTML shell for asset requests too --
+# a 200 with text/html where app.js was expected, and a blank page in the
+# browser. server.php returns false for files that exist so the server
+# streams them itself. (Laravel 11 dropped the bundled copy, so this repo
+# ships its own.)
 # ---------------------------------------------------------------------------
 HTTP_PORT="${PORT:-80}"
 echo "-> Starting TaskManager on 0.0.0.0:${HTTP_PORT}"
 export PHP_CLI_SERVER_WORKERS="${PHP_CLI_SERVER_WORKERS:-4}"
 
-exec php -S "0.0.0.0:${HTTP_PORT}" -t public public/index.php
+exec php -S "0.0.0.0:${HTTP_PORT}" -t public server.php
