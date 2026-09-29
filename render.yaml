@@ -1,35 +1,56 @@
-# Render blueprint (free tier) — single-service demo using SQLite.
+# Render Blueprint — TaskManager demo
 #
-# Notes:
-#   * Render injects PORT (default 10000) and proxies traffic to
-#     0.0.0.0:$PORT only. The entrypoint renders docker/deploy/nginx.conf.tpl
-#     with that port at boot, so no PORT value is hardcoded here.
-#   * Free services are ephemeral — the demo DB is rebuilt from seed on every
-#     deploy/restart. That gives each visitor a fresh demo data set.
-#   * Free instances also spin down after ~15 min idle and restart on the next
-#     request. Sessions live in the (ephemeral) database, so visitors are logged
-#     out after a spin-down. Seeders are idempotent, so restarts are safe.
-#   * To use MySQL instead, add DB_HOST/DB_PORT/DB_DATABASE/DB_USERNAME/
-#     DB_PASSWORD and set DB_CONNECTION=mysql (Render has no managed MySQL,
-#     so point it at any MySQL you control).
-#   * `repo` below is the deploy remote (ram-chy/deployTaskManager); change it
-#     if you fork.
+# ############################################################################
+# #  READ THIS BEFORE DEPLOYING                                                #
+# #                                                                          #
+# #  Render has NO native PHP runtime.                                        #
+# #                                                                          #
+# #  Supported native runtimes are: node, python, ruby, go, rust, elixir.    #
+# #  From Render's own docs (language-support):                              #
+# #    "To run virtually any language (PHP, .NET, Java/Kotlin/Scala, etc.),  #
+# #     you can deploy a Docker image."                                       #
+# #                                                                          #
+# #  This app is Laravel/PHP 8.4. There is no way to serve it on Render     #
+# #  without a container. The `runtime` field below is deliberately left     #
+# #  uncommented-as-invalid so the Blueprint fails validation immediately    #
+# #  with a clear message, rather than after a long, opaque build.           #
+# #                                                                          #
+# #  TO DEPLOY: restore a Dockerfile and set `runtime: docker` (see below).  #
+# #  A minimal one for this app is ~30 lines.                                #
+# ############################################################################
+#
+# Free-tier notes:
+#   * Free instances are ephemeral. The demo DB (SQLite) is rebuilt from
+#     seed on every deploy/restart, so each visitor gets fresh demo data.
+#   * Free instances spin down after ~15 min idle and restart on the next
+#     request, which also re-runs migrations and seeders. They are
+#     idempotent, so restarts are safe.
+#   * Sessions live in the ephemeral database, so visitors are logged out
+#     after a spin-down.
+
 services:
   - type: web
     name: taskmanager
-    runtime: docker
-    repo: https://github.com/ram-chy/deployTaskManager.git
     plan: free
-    dockerfilePath: ./Dockerfile
-    healthCheckPath: /
+    # runtime: docker        <-- required, and the only option for PHP
+    healthCheckPath: /up
     autoDeploy: true
     envVars:
       - key: APP_ENV
         value: production
       - key: APP_DEBUG
         value: "false"
+      # Render generates a base64 value once and keeps it across restarts, so
+      # sessions survive a container restart. Do NOT hand-write this value:
+      # Laravel requires the "base64:" prefix and exactly 16 or 32 decoded
+      # bytes, so a raw 43-character base64 string breaks every request with
+      # "Unsupported cipher or incorrect key length".
+      - key: APP_KEY
+        generateValue: true
       - key: LOG_CHANNEL
         value: stderr
+      - key: LOG_LEVEL
+        value: info
       - key: APP_SEED_DEMO
         value: "true"
       - key: DB_CONNECTION
@@ -42,7 +63,14 @@ services:
         value: database
       - key: CACHE_STORE
         value: database
+      # Render terminates TLS and forwards plain HTTP, so the request arrives
+      # with scheme "http" unless the forwarded headers are trusted. Without
+      # this, Laravel emits http:// asset URLs on an https:// page and the
+      # browser blocks them as mixed content.
       - key: TRUSTED_PROXIES
         value: "*"
+      # Reverb needs a public TCP port, which free plans do not provide.
       - key: START_REVERB
         value: "false"
+      - key: BROADCAST_CONNECTION
+        value: "null"

@@ -108,7 +108,7 @@ APP_URL=http://your-domain.local
 
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
-DB_PORT=3306
+DB_PORT=3006
 DB_DATABASE=taskmanager
 DB_USERNAME=root
 DB_PASSWORD=your_password
@@ -209,41 +209,73 @@ php artisan backup:database
 
 ---
 
-## Deployment (Docker demo)
+## Deployment
 
-The repo ships with a Docker setup (`Dockerfile`, `docker-compose.yml`,
-`render.yaml`, `railway.json`) so you can stand up a demo in a few minutes.
+### Render: a container is required
 
-### 1. Local demo (Docker Compose)
+**Render has no native PHP runtime, so this app cannot be deployed to Render
+without a `Dockerfile`.** This is a platform limitation, not a project
+limitation.
 
-```bash
-cp .env.example .env      # optional; the container provides its own values
-docker compose up --build
+Render's supported native runtimes are Node.js/Bun, Python, Ruby, Go, Rust and
+Elixir. The list is enforced by their published Blueprint schema:
+
+```
+/definitions/runtime -> ['docker', 'elixir', 'go', 'image',
+                         'node', 'python', 'ruby', 'rust', 'static']
 ```
 
-Open `http://localhost:8000`. MySQL and demo data are provisioned automatically.
+From Render's own documentation:
 
-### 2. Render (free tier)
+> To run virtually *any* language (PHP, .NET, Java/Kotlin/Scala, etc.), you can
+> deploy a Docker image. — [language-support](https://render.com/docs/language-support)
 
-1. Push the repo to GitHub.
-2. In Render, **New → Blueprint**, point it at the repo, choose `render.yaml`.
-3. Change `repo` in `render.yaml` to your repo URL if you use the dashboard form.
-4. After deploy, generated data is ephemeral (SQLite, rebuilt on each deploy).
+There is no buildpack fallback either. Guides describing a "select PHP from the
+list" dropdown and `php artisan serve --port=$PORT` are outdated; that approach
+predates Render dropping native PHP support.
 
-> Render only proxies traffic to `0.0.0.0:$PORT` (default `10000`). The
-> container entrypoint renders `docker/deploy/nginx.conf.tpl` with that port at
-> boot, so no port is hardcoded — nothing to configure.
->
-> Free instances also spin down after ~15 min idle and restart on the next
-> request. Sessions live in the ephemeral database, so visitors are logged out
-> afterwards. The seeders are idempotent, so restarts do not duplicate data.
+`render.yaml` in this repo therefore ships **without** a `runtime` field on
+purpose. Syncing the Blueprint fails validation immediately with a clear
+message rather than after a long, opaque build. To deploy, add a `Dockerfile`
+and set `runtime: docker`.
 
-### 3. Railway
+### Deploying to Render (with a Dockerfile)
 
-1. Push to GitHub and create a Railway project.
-2. Add a **MySQL** plugin and name it `MySQL`.
-3. Deploy the repo — Railway uses `railway.json`, which wires up the app to the
-   MySQL plugin automatically.
+1. Add a `Dockerfile` to the repo root. Keep it minimal — for a demo you do not
+   need nginx, PHP-FPM and supervisord. A single PHP process is enough:
+
+   ```dockerfile
+   FROM php:8.4-cli-alpine
+   WORKDIR /var/www/html
+   RUN apk add --no-cache sqlite nginx supervisor
+   COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+   COPY . .
+   RUN composer install --no-dev --optimize-autoloader --no-interaction \
+       && npm ci && npm run build \
+       && mkdir -p storage/framework/{cache/data,sessions,views} \
+              storage/logs bootstrap/cache database \
+       && touch database/database.sqlite \
+       && composer dump-autoload -o
+   EXPOSE 80
+   CMD ["/bin/sh", "-c", "php artisan migrate --force && php artisan db:seed --force && php -S 0.0.0.0:${PORT:-80} -t public public/index.php"]
+   ```
+
+2. Set `runtime: docker` in `render.yaml`.
+3. Push to GitHub, then in Render choose **New → Blueprint** and point it at
+   the repo.
+
+> Free instances spin down after ~15 minutes of inactivity and their filesystem
+> is wiped on restart. Because the demo database is SQLite and lives on that
+> filesystem, it is rebuilt from the seeders on every boot — each visitor gets
+> a fresh demo data set, and anyone mid-session is logged out. The seeders are
+> idempotent, so restarts never duplicate data.
+
+### Deploying to a host with native PHP support
+
+If you would rather not maintain a container at all, deploy to any host that
+provides PHP 8.4 directly (shared hosting, Plesk, Laravel-specific hosts). The
+app needs no Docker-specific changes there — follow the standard installation
+above, then point the vhost's document root at `public/`.
 
 ### Demo accounts (seeded with `APP_SEED_DEMO=true`)
 
@@ -256,8 +288,8 @@ Open `http://localhost:8000`. MySQL and demo data are provisioned automatically.
 ### Realtime notifications (optional)
 
 The demo runs without websockets by default. To enable Laravel Reverb, set
-`START_REVERB=true` and export port **8080** in your hosting platform (public
-TCP ports are only available on paid plans on most hosts).
+`BROADCAST_CONNECTION=reverb` and run `php artisan reverb:start` alongside the
+app. It needs a public TCP port, which most free hosting plans do not provide.
 
 ---
 
